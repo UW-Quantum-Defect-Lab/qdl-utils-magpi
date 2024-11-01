@@ -524,7 +524,7 @@ class ScanPopoutApplication():
                                                   'scan_id', 
                                                   'timestamp', 
                                                   'original_name'], dtype='S'))
-            ds.attrs['application'] = 'qdlutils.qt3ple'
+            ds.attrs['application'] = 'qdlutils.qdlple'
             ds.attrs['qdlutils_version'] = qdlutils.__version__
             ds.attrs['scan_id'] = self.id
             ds.attrs['timestamp'] = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")

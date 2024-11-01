@@ -103,9 +103,8 @@ class PositionControllerApplication():
         This method loads a YAML file to configure the qdlmove hardware
         based on yaml file indicated by argument `afile`.
 
-        This method configures the wavelength controller and the readers
-        based off of the YAML file data, and then generates a class 
-        consctrutor for the main application controller.
+        This method constructs the positioners and configures them, then
+        stores them in a dictionary which is saved in the application.
         '''
         with open(afile, 'r') as file:
             # Log selection

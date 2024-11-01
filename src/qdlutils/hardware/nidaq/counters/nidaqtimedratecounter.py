@@ -125,14 +125,14 @@ class NidaqTimedRateCounter(NidaqBatchedRateCounter):
 
 
     def __init__(self,
-                 daq_name = 'Dev1',
-                 signal_terminal = 'PFI0',
-                 clock_rate = 1000000,
-                 sample_time_in_seconds = 1,
-                 clock_terminal = None,
-                 read_write_timeout = 10,
-                 signal_counter = 'ctr2',
-                 trigger_terminal = None,):
+                 daq_name: str = 'Dev1',
+                 signal_terminal: str  = 'PFI0',
+                 clock_rate: int  = 1000000,
+                 sample_time_in_seconds: float  = 1,
+                 clock_terminal: str  = None,
+                 read_write_timeout: float  = 10,
+                 signal_counter: str  = 'ctr2',
+                 trigger_terminal: str  = None):
         
         # Save the only new attribute
         self.sample_time_in_seconds = sample_time_in_seconds

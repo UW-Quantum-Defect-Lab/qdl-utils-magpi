@@ -209,7 +209,7 @@ class NidaqBatchedRateCounter:
     def start(self) -> None:
         '''
         Configure the DAQ and start the clock task.
-        This method is called externally before a measurement is set to begi.
+        This method is called externally before a measurement is set to begin.
         '''
         # If currently running, stop the clock task
         if self.running:
