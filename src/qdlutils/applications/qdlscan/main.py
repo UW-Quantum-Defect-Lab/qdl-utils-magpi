@@ -9,6 +9,8 @@ from threading import Thread
 import tkinter as tk
 import yaml
 
+from scipy.optimize import curve_fit
+
 import qdlutils
 from qdlutils.applications.qdlscan.application_controller import ScanController
 from qdlutils.applications.qdlscan.application_gui import (
@@ -591,7 +593,7 @@ class LineScanApplication:
         self.time_per_pixel = time / n_pixels
 
         # Optimization type
-        self.optimization_method = 'none'
+        self.optimization_method = 'gaussian'
 
         self.id = id
         self.timestamp = datetime.datetime.now()
@@ -656,7 +658,7 @@ class LineScanApplication:
         # Set the commands for the right click
         self.view.rclick_menu.add_command(label='Go to position', command=self.rclick_go_to) 
         self.view.rclick_menu.add_separator() 
-        self.view.rclick_menu.add_command(label='Open counter') 
+        self.view.rclick_menu.add_command(label='Open counter', command=self.rclick_open_counter) 
 
         # Launch the thread
         self.scan_thread = Thread(target=self.scan_thread_function)
@@ -698,7 +700,8 @@ class LineScanApplication:
             self._optimization_method_none()
         # Fit the data to a gaussian and move to peak
         elif self.optimization_method == 'gaussian':
-            pass
+            # Gaussian optimize
+            self._optimization_method_gaussian()
         # Move to location with highest density?
         elif self.optimization_method == 'density':
             pass
@@ -746,6 +749,43 @@ class LineScanApplication:
         For this method we do nothing and just reset the position to the start postion.
         '''
         self.final_position_axis = self.start_position_axis
+
+    def _optimization_method_gaussian(self) -> None:
+        '''
+        Internal method for determining the optimal position.
+
+        For this method we fit the data to a Gaussian envelope centered at the maximum
+        counts position.
+        '''
+
+        def fit_function(x, a, x0, sigma, c):
+            return a * np.exp(-(x-x0)**2 / (2*sigma**2)) + c
+        
+        # Initial guess for parameters
+        max_counts_idx = np.argmax(self.data_y)
+        max_counts = self.data_y[max_counts_idx]
+        position_max_counts = self.data_x[max_counts_idx]
+        min_counts = np.min(self.data_y)
+        a = max_counts - min_counts
+        x0 = position_max_counts
+        sigma = 0.300 # 300 microns
+        c = min_counts
+
+        try:
+            p, _ = curve_fit(f=fit_function, 
+                             xdata=self.data_x, 
+                             ydata=self.data_y,
+                             p0=[a, x0, sigma, c],
+                             bounds=[[100,self.min_position, 0.250, 0],
+                                     [np.inf, self.max_position, np.inf, np.inf]]) 
+                                    # ^ Increase the lower bound on a to prevent fitting to noise
+            
+            self.final_position_axis = p[1] # Set to x0
+
+        except Exception as e:
+            logger.info('Failed to find maximum: ' + str(e))
+            self.final_position_axis = self.start_position_axis
+        
         
     def save_scan(self, tkinter_event=None) -> None:
         '''
@@ -1150,6 +1190,8 @@ class ImageScanApplication():
                 logger.debug('Row complete.')
 
             self.home_position()
+            # Update the figure
+            self.view.update_figure()
             logger.info('Scan complete.')
 
         except Exception as e:
@@ -1185,6 +1227,8 @@ class ImageScanApplication():
                 logger.debug('Row complete.')
 
             self.home_position()
+            # Update the figure
+            self.view.update_figure()
             logger.info('Scan complete.')
 
         except Exception as e:

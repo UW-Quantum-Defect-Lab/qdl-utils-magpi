@@ -135,6 +135,11 @@ class ScanController:
         else:
             raise ValueError(f'Requested axis {axis} is invalid.')
         
+        # Go to start position
+        self._set_axis(axis_controller=axis_controller, position=start)
+        # Let the axis settle before next scan
+        time.sleep(self.inter_scan_settle_time)
+        
         data = self._scan_axis(axis_controller=axis_controller,
                                start=start,
                                stop=stop,
@@ -260,6 +265,15 @@ class ScanController:
                                            scan_time=scan_time)
             # Update the buffer
             #output[index] = single_scan
+
+            # Set back to original position on fast scan axis
+            #self._set_axis(axis_controller=axis_controller_1, position=start_1)
+            # Slow scan back to start for smooth scanning?
+            self._scan_axis(axis_controller=axis_controller_1,
+                            start=stop_1,
+                            stop=start_1,
+                            n_pixels=n_pixels_1, 
+                            scan_time=self.inter_scan_settle_time)
 
             # Yield a single scan
             yield single_scan

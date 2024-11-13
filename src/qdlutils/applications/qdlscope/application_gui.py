@@ -102,7 +102,7 @@ class ScopeControlPanel:
         row += 1
         tk.Label(control_frame, text='Time per sample (s)').grid(row=row, column=0, padx=5, pady=2)
         self.sample_time_entry = tk.Entry(control_frame, width=10)
-        self.sample_time_entry.insert(0, 0.01)
+        self.sample_time_entry.insert(0, 0.005)
         self.sample_time_entry.grid(row=row, column=1, padx=5, pady=2)
         # Scan speed
         row += 1

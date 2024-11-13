@@ -284,7 +284,7 @@ class ScopeApplication:
 
         # Get the path
         file_path = '/'.join(afile.split('/')[:-1])  + '/'
-        self.parent_application.last_save_directory = file_path # Save the last used file path
+        self.last_save_directory = file_path # Save the last used file path
         logger.info(f'Saving files to directory: {file_path}')
         # Get the name with extension (will be overwritten)
         file_name = afile.split('/')[-1]
@@ -320,7 +320,7 @@ class ScopeApplication:
             ds = df.create_dataset('scan_settings/sample_time', data=self.daq_parameters['sample_time'])
             ds.attrs['units'] = 'seconds'
             ds.attrs['description'] = 'Time that the DAQ integrates counts over.'
-            ds = df.create_dataset('scan_settings/sample_time', data=self.daq_parameters['get_rate'])
+            ds = df.create_dataset('scan_settings/is_rate', data=self.daq_parameters['get_rate'])
             ds.attrs['units'] = 'None'
             ds.attrs['description'] = 'Boolean; if the recorded data is the rate.'
 
@@ -328,7 +328,7 @@ class ScopeApplication:
             ds.attrs['units'] = 'seconds'
             ds.attrs['description'] = 'Timestamp of each sample relative to the start of the sampling.'
             ds = df.create_dataset('data/intensity', data=self.data_y)
-            if self._get_daq_config['get_rate']:
+            if self.daq_parameters['get_rate']:
                 ds.attrs['units'] = 'counts per second'
             else:
                 ds.attrs['units'] = 'counts'

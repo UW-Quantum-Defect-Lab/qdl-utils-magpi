@@ -221,6 +221,9 @@ class MainTkApplication():
                 self.current_scan.view.data_viewport.update_image_and_plot(self.current_scan.application_controller)
                 self.current_scan.view.canvas.draw()
 
+            # Set repump to toggle value
+            self.toggle_repump_laser()
+
             logger.info('Scan complete.')
             self.current_scan.application_controller.stop()
 

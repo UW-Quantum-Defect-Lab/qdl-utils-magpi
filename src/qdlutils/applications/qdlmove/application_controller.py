@@ -17,12 +17,23 @@ class MovementController:
     '''
     def __init__(self, positioners: dict = {}):
         self.positioners = positioners # dictionary of the controller instantiations
+        self.busy = False
 
 
     def move_axis(self, axis_controller_name: str, position: float):
+        if self.busy:
+            logger.warning('Movement controller busy')
+            return None
+        self.busy = True
         # Move the axis specified by the axis_controller_name
         self.positioners[axis_controller_name].go_to_position(position)
+        self.busy = False
 
     def step_axis(self, axis_controller_name: str, dx: float):
+        if self.busy:
+            logger.warning('Movement controller busy')
+            return None
+        self.busy = True
         # Step the axis specified by the axis_controller_name
         self.positioners[axis_controller_name].step_position(dx)
+        self.busy = False

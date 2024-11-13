@@ -194,7 +194,7 @@ class LineScanApplicationView:
         self.data_viewport.ax.set_ylim(y_axis_limits)
 
         self.data_viewport.ax.set_xlabel(f'{self.application.axis} position (μm)', fontsize=14)
-        self.data_viewport.ax.set_ylabel(f'Intensity (counts/second)', fontsize=14)
+        self.data_viewport.ax.set_ylabel(f'Intensity (cts/s)', fontsize=14)
         self.data_viewport.ax.grid(alpha=0.3)
 
         self.data_viewport.canvas.draw()

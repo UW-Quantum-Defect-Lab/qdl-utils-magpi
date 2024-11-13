@@ -269,11 +269,15 @@ class PleScanner:
         self.sample_step_size_down = (min - max) / (n_pixels_down * n_subpixels)  # Should be negative
         
         # Calculate the output voltage readings
-        self.pixel_voltages_up = np.arange(min, max, self.pixel_step_size_up)
-        self.pixel_voltages_down = np.arange(max, min, self.pixel_step_size_down)
+        #self.pixel_voltages_up = np.arange(min, max, self.pixel_step_size_up)
+        #self.pixel_voltages_down = np.arange(max, min, self.pixel_step_size_down)
+        self.pixel_voltages_up = np.linspace(min, max - self.pixel_step_size_up, n_pixels_up)
+        self.pixel_voltages_down = np.linspace(max, min + self.pixel_step_size_down, n_pixels_down)
         # Calculate the sample voltage readings
-        self.sample_voltages_up = np.arange(min, max, self.sample_step_size_up)
-        self.sample_voltages_down = np.arange(max, min, self.sample_step_size_down)
+        #self.sample_voltages_up = np.arange(min, max, self.sample_step_size_up)
+        #self.sample_voltages_down = np.arange(max, min, self.sample_step_size_down)
+        self.sample_voltages_up = np.linspace(min, max - self.sample_step_size_up, n_pixels_up * n_subpixels)
+        self.sample_voltages_down = np.linspace(max, min - self.sample_step_size_down, n_pixels_down * n_subpixels)
 
         # Calculate time per pixel
         self.pixel_time_up = time_up / n_pixels_up
@@ -500,7 +504,7 @@ class PleScanner:
         # Wait for repump time
         time.sleep(self.time_repump * 0.001)
         # Turn off the pump laser
-        repump_controller.go_to_voltage(voltage=repump_controller.max_voltage)
+        repump_controller.go_to_voltage(voltage=repump_controller.min_voltage)
 
 
     def __del__(self):
