@@ -189,11 +189,15 @@ class DataViewport:
         self.ax = plt.gca()
         self.cbar = None
         self.cmap = mplcolormap
+        self.norm_min = None
+        self.norm_max = None
         self.cid = self.fig.canvas.mpl_connect('button_press_event', self.onclick)
         self.log_data = False
 
+        self.integrate_scans = False
 
-    def update_image_and_plot(self, model) -> None:
+
+    def update_figure(self, model) -> None:
         '''
         Updates the ScanImage GUI element
         '''
@@ -201,7 +205,11 @@ class DataViewport:
             self.fig.delaxes(ax)
         num_readers = len(model.readers)
         grid = plt.GridSpec(1, num_readers)
-        self.update_image(model, grid)
+
+        if self.integrate_scans:
+            self.update_plot(model, grid)
+        else:
+            self.update_image(model, grid)
 
     def update_image(self, model, grid) -> None:
         '''
@@ -223,8 +231,7 @@ class DataViewport:
 
         # Plot the scan
         ax = self.fig.add_subplot()
-        artist = ax.imshow(
-                        img_data.T,
+        img = ax.imshow(img_data.T,
                         cmap=self.cmap, 
                         extent=[0.5,
                                 img_data.shape[0]+0.5,
@@ -233,7 +240,7 @@ class DataViewport:
                         interpolation='none',
                         aspect='auto',
                         origin='lower')
-        cbar = self.fig.colorbar(artist, ax=ax)
+        cbar = self.fig.colorbar(img, ax=ax)
 
         # Set the xtick labels
         # We set up some logic to make it readable
@@ -256,6 +263,10 @@ class DataViewport:
         # Set the grid
         ax.grid(alpha=0.3, axis='y', linewidth=1, color='k')#, dashes=(5,5))
 
+        # Normalize the figure if not already normalized
+        if (self.norm_min is not None) and (self.norm_max is not None):
+            img.set_norm(plt.Normalize(vmin=self.norm_min, vmax=self.norm_max))
+
     def calculate_ytick_labels(self, y, y_min, y_max, max_tick):
         '''
         Method to compute the ytick labels
@@ -267,11 +278,30 @@ class DataViewport:
         Updates 2-d line plots, currently not in use.
         '''
 
-        for ii, reader in enumerate(model.readers):
-            y_data = model.outputs[model.current_frame-1][reader]
-            x_control = model.scanned_control[model.current_frame-1]
-            ax = self.fig.add_subplot(grid[1, ii])
-            ax.plot(x_control, y_data, color='k', linewidth=1.5)
+        # Look for the single DAQ reader and get the image data
+        for reader in model.readers:
+            if isinstance(model.readers[reader], NidaqTimedRateCounter):
+                img_data = np.array([output[reader] for output in model.outputs])
+
+        # Calculate the axis extent
+        # Want to assign y axis values 0 -> 1 on the upscan, then 1 -> y_max on
+        # the downscan. Because imshow scales all samples uniformly, we need
+        # (y_max - 1) / 1 = n_pixels_down / n_pixels_up
+        y_max = 1 + model.n_pixels_down / model.n_pixels_up
+        unitless_voltages = np.linspace(0, y_max, model.n_pixels_down + model.n_pixels_up)
+
+        # Plot the scan
+        ax = self.fig.add_subplot()
+        ax.plot(unitless_voltages, np.sum(img_data.T, axis=-1)/len(img_data))
+        ax.set_ylim(self.norm_min, self.norm_max)
+        ax.set_xlabel('Voltage (V)', fontsize=14)
+        ax.set_ylabel('Intensity (cts/s)', fontsize=14)
+        x_ticks = ax.get_xticks()
+        ax.set_xticks( x_ticks, self.calculate_ytick_labels(x_ticks, model.min, model.max, y_max) )
+        ax.set_xlim(0,y_max)
+        ax.grid(alpha=0.3)
+        ax.set_title(f'Integrating {len(img_data)} scans')
+
 
     def reset(self) -> None:
         self.ax.cla()
@@ -375,6 +405,37 @@ class DataViewportControlPanel():
         self.repump_entry.config(state='readonly')
         self.repump_entry.grid(row=row, column=1)
 
-
-
-
+        # Scan settings view
+        image_settings_frame = tk.Frame(base_frame)
+        image_settings_frame.pack(side=tk.TOP, padx=0, pady=0)
+        # Single axis scan section
+        row = 0
+        tk.Label(image_settings_frame, 
+                 text='Image settings', 
+                 font='Helvetica 14').grid(row=row, column=0, pady=[10,5], columnspan=2)
+        # Minimum
+        row += 1
+        tk.Label(image_settings_frame, text='Minimum (cts/s)').grid(row=row, column=0, padx=5, pady=2)
+        self.image_minimum = tk.Entry(image_settings_frame, width=10)
+        self.image_minimum.insert(0, 0)
+        self.image_minimum.grid(row=row, column=1, padx=5, pady=2)
+        # Maximum
+        row += 1
+        tk.Label(image_settings_frame, text='Maximum (cts/s)').grid(row=row, column=0, padx=5, pady=2)
+        self.image_maximum = tk.Entry(image_settings_frame, width=10)
+        self.image_maximum.insert(0, 5000)
+        self.image_maximum.grid(row=row, column=1, padx=5, pady=2)
+        # Set normalization button
+        row += 1
+        self.norm_button = tk.Button(image_settings_frame, text='Normalize', width=15)
+        self.norm_button.grid(row=row, column=0, columnspan=2, pady=[5,1])
+        # Autonormalization button
+        row += 1
+        self.autonorm_button = tk.Button(image_settings_frame, text='Auto-normalize', width=15)
+        self.autonorm_button.grid(row=row, column=0, columnspan=2, pady=[1,1])
+        # Image toggle
+        row += 1
+        self.integrate_scans = tk.IntVar()
+        self.integrate_scans_toggle = tk.Checkbutton ( 
+            image_settings_frame, var=self.integrate_scans, text='Integrate scans')
+        self.integrate_scans_toggle.grid(row=row, column=0, pady=[0,0], columnspan=2)

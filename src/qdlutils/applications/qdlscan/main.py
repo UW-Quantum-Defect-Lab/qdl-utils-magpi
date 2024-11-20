@@ -77,7 +77,7 @@ class LauncherApplication:
     For additional details about the individual components please see their docstrings.
     '''
 
-    def __init__(self, default_config_filename: str) -> None:
+    def __init__(self, default_config_filename: str, is_root_process: bool) -> None:
         '''
         Initialization for the LauncherApplication class. It loads the application
         controller and various hardware, then creates a GUI and binds the buttons.
@@ -89,6 +89,10 @@ class LauncherApplication:
             Filename of the default config YAML file. It must be located in the
             `qdlscan/config_files` directory.
         '''
+        # Boolean if the function is the root or not, determines if the application is
+        # intialized via tk.Tk or tk.Toplevel
+        self.is_root_process = is_root_process
+
         # Attributes
         self.application_controller = None
         self.min_x_position = None
@@ -117,7 +121,10 @@ class LauncherApplication:
         self.load_yaml_from_name(yaml_filename=default_config_filename)
 
         # Initialize the root tkinter widget (window housing GUI)
-        self.root = tk.Tk()
+        if self.is_root_process:
+            self.root = tk.Tk()
+        else:
+            self.root = tk.Toplevel()
         # Create the main application GUI
         self.view = LauncherApplicationView(main_window=self.root)
 
@@ -141,7 +148,8 @@ class LauncherApplication:
         # Display the window (not in task bar)
         self.root.deiconify()
         # Launch the main loop
-        self.root.mainloop()
+        if self.is_root_process:
+            self.root.mainloop()
 
     def configure_from_yaml(self, afile: str) -> None:
         '''
@@ -469,7 +477,7 @@ class LauncherApplication:
 
     def open_counter(self, tkinter_event=None) -> None:
         try:
-            qdlscope.main()
+            qdlscope.main(is_root_process=False)
         except Exception as e:
             logger.warning(f'{e}')
 
@@ -738,7 +746,7 @@ class LineScanApplication:
 
     def rclick_open_counter(self):
         try:
-            qdlscope.main()
+            qdlscope.main(is_root_process=False)
         except Exception as e:
             logger.warning(f'{e}')
   
@@ -1289,7 +1297,7 @@ class ImageScanApplication():
         of `qdlscope`.
         '''
         try:
-            qdlscope.main()
+            qdlscope.main(is_root_process=False)
         except Exception as e:
             logger.warning(f'{e}')
 
@@ -1324,9 +1332,10 @@ class ImageScanApplication():
         self.view.update_figure()
 
 
-
-def main():
-    tkapp = LauncherApplication(DEFAULT_CONFIG_FILE)
+def main(is_root_process=True):
+    tkapp = LauncherApplication(
+        default_config_filename=DEFAULT_CONFIG_FILE,
+        is_root_process=is_root_process)
     tkapp.run()
 
 if __name__ == '__main__':

@@ -455,7 +455,7 @@ class ImageFigureControlPanel:
         self.image_time_entry.grid(row=row, column=1, padx=5, pady=2)
         self.image_time_entry.config(state='readonly')
 
-         # Scan settings view
+        # Scan settings view
         image_settings_frame = tk.Frame(frame)
         image_settings_frame.pack(side=tk.TOP, padx=0, pady=0)
         # Single axis scan section

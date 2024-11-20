@@ -40,8 +40,12 @@ class PositionControllerApplication():
     should be able to easily add other hardware types.
     '''
 
-    def __init__(self, default_config_filename: str):
+    def __init__(self, default_config_filename: str, is_root_process: bool):
         
+        # Boolean if the function is the root or not, determines if the application is
+        # intialized via tk.Tk or tk.Toplevel
+        self.is_root_process = is_root_process
+
         self.positioners = {}
         self.application_controller = None
 
@@ -49,7 +53,10 @@ class PositionControllerApplication():
         self.load_yaml_from_name(yaml_filename=default_config_filename)
 
         # Start application
-        self.root = tk.Tk()
+        if self.is_root_process:
+            self.root = tk.Tk()
+        else:
+            self.root = tk.Toplevel()
         # Launch the GUI
         self.view = PositionControllerApplicationView(main_window = self.root)
         # Load the application controller
@@ -167,8 +174,9 @@ class PositionControllerApplication():
         self.root.title("qdlmove")
         # Display the window (not in task bar)
         self.root.deiconify()
-        # Launch the main loop
-        self.root.mainloop()
+        # Launch the main loop if root
+        if self.is_root_process:
+            self.root.mainloop()
 
 
 
@@ -558,8 +566,10 @@ class ThreeAxisApplicationControl():
         self.gui.axis_3_readout_entry.config(state='readonly')
 
 
-def main():
-    tkapp = PositionControllerApplication(DEFAULT_CONFIG_FILE)
+def main(is_root_process=True):
+    tkapp = PositionControllerApplication(
+        default_config_filename=DEFAULT_CONFIG_FILE,
+        is_root_process=is_root_process)
     tkapp.run()
 
 

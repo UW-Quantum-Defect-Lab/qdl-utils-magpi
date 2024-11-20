@@ -57,7 +57,7 @@ class ScopeApplication:
         `qdlscope.application_controller:read_counts_batches()`
     '''
 
-    def __init__(self, default_config_filename: str) -> None:
+    def __init__(self, default_config_filename: str, is_root_process: bool) -> None:
         '''
         Parameters
         ----------
@@ -65,6 +65,9 @@ class ScopeApplication:
             Name of the default YAML config file. The loader will look for this file in
             the default path `CONFIG_PATH` defined at the top of this module. 
         '''
+        # Boolean if the function is the root or not, determines if the application is
+        # intialized via tk.Tk or tk.Toplevel
+        self.is_root_process = is_root_process
         
         self.application_controller = None
 
@@ -89,7 +92,10 @@ class ScopeApplication:
         self.load_yaml_from_name(yaml_filename=default_config_filename)
 
         # Initialize the root tkinter widget (window housing GUI)
-        self.root = tk.Tk()
+        if self.is_root_process:
+            self.root = tk.Tk()
+        else:
+            self.root = tk.Toplevel()
         # Create the main application GUI
         self.view = ScopeApplicationView(main_window=self.root, application=self)
 
@@ -111,7 +117,8 @@ class ScopeApplication:
         # Display the window (not in task bar)
         self.root.deiconify()
         # Launch the main loop
-        self.root.mainloop()
+        if self.is_root_process:
+            self.root.mainloop()
 
     def enable_buttons(self) -> None:
         '''
@@ -423,8 +430,10 @@ class ScopeApplication:
         }
 
 
-def main():
-    tkapp = ScopeApplication(DEFAULT_CONFIG_FILE)
+def main(is_root_process=True):
+    tkapp = ScopeApplication(
+        default_config_filename=DEFAULT_CONFIG_FILE,
+        is_root_process=is_root_process)
     tkapp.run()
 
 if __name__ == '__main__':

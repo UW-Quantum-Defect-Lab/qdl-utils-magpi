@@ -32,12 +32,15 @@ class MainTkApplication():
     '''
     Main application backend, launches the GUI and handles events
     '''
-    def __init__(self, default_config_filename) -> None:
+    def __init__(self, default_config_filename: str, is_root_process: bool) -> None:
         '''
         Initializes the application.
         Args:
             controller_name (str) : name of controller used to identify the YAML config
         '''
+        # Boolean if the function is the root or not, determines if the application is
+        # intialized via tk.Tk or tk.Toplevel
+        self.is_root_process = is_root_process
 
         # Define class attributes to store data aquisition and controllers
         self.wavelength_controller_model = None
@@ -56,7 +59,10 @@ class MainTkApplication():
         self.load_controller_from_name(yaml_filename=default_config_filename)
 
         # Initialize the root tkinter widget (window housing GUI)
-        self.root = tk.Tk()
+        if self.is_root_process:
+            self.root = tk.Tk()
+        else:
+            self.root = tk.Toplevel()
         # Create the main application GUI and specify the controller name
         self.view = MainApplicationView(self, 
                                         scan_range=[self.wavelength_controller_model.min_voltage, 
@@ -73,8 +79,10 @@ class MainTkApplication():
         # Turn off the repump laser at startup
         self.toggle_repump_laser(cmd=False)
 
-        # Set protocol for shutdown when the root tkinter widget is closed
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        # Set protocol for shutdown when the root tkinter widget is closed (if root process)
+        if self.is_root_process:
+            self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
 
     def go_to(self, event=None) -> None:
         '''
@@ -218,7 +226,7 @@ class MainTkApplication():
 
             while self.current_scan.application_controller.still_scanning():
                 self.current_scan.application_controller.scan_wavelengths()
-                self.current_scan.view.data_viewport.update_image_and_plot(self.current_scan.application_controller)
+                self.current_scan.view.data_viewport.update_figure(self.current_scan.application_controller)
                 self.current_scan.view.canvas.draw()
 
             # Set repump to toggle value
@@ -405,7 +413,8 @@ class MainTkApplication():
         # Display the window (not in task bar)
         self.root.deiconify()
         # Launch the main loop
-        self.root.mainloop()
+        if self.is_root_process:
+            self.root.mainloop()
 
 
     def on_closing(self) -> None:
@@ -475,6 +484,10 @@ class ScanPopoutApplication():
 
         # Bind the buttons to callbacks
         self.view.control_panel.save_scan_button.bind("<Button>", self.save_data)
+        self.view.control_panel.norm_button.bind("<Button>", self.set_normalize)
+        self.view.control_panel.autonorm_button.bind("<Button>", self.auto_normalize)
+
+        self.view.control_panel.integrate_scans_toggle.config(command=self.toggle_integrate)
 
         # Set the behavior on clsing the window, launch main loop for window
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -622,7 +635,51 @@ class ScanPopoutApplication():
             ds.attrs['units'] = 'Counts/second'
             ds.attrs['description'] = '2-d array of counts per second at each pixel of the downscans only.'
 
+    def set_normalize(self, tkinter_event: tk.Event = None) -> None:
+        '''
+        Callback function to set the normalization of the figure based off of the values
+        written to the GUI.
+        '''
+        # Get the value from the controller
+        norm_min = float(self.view.control_panel.image_minimum.get())
+        norm_max = float(self.view.control_panel.image_maximum.get())
 
+        if norm_min > norm_max:
+            raise ValueError(f'Minimum norm value {norm_min} > {norm_max}.')
+        if norm_min < 0:
+            raise ValueError(f'Minimum norm cannot be less than 0.')
+
+        # Save the minimum/maximum norm
+        self.view.data_viewport.norm_min = norm_min
+        self.view.data_viewport.norm_max = norm_max
+
+        self.view.data_viewport.update_figure(self.application_controller)
+        self.view.canvas.draw()
+
+    def auto_normalize(self, tkinter_event: tk.Event = None) -> None:   
+        '''
+        Callback function to autonormalize the figure.
+        '''
+        # Save the minimum/maximum norm
+        self.view.data_viewport.norm_min = None
+        self.view.data_viewport.norm_max = None
+
+        self.view.data_viewport.update_figure(self.application_controller)
+        self.view.canvas.draw()
+
+    def toggle_integrate(self):
+        # Check if the checkbox is checked in the GUI
+        if (self.view.control_panel.integrate_scans.get() == 1):
+            self.view.data_viewport.integrate_scans = True
+        else:
+            self.view.data_viewport.integrate_scans = False
+
+        try:
+            # Update the figure
+            self.view.data_viewport.update_figure(self.application_controller)
+            self.view.canvas.draw()
+        except Exception as e:
+            logger.warning(f'Error in toggling: {e}')
 
 
     def on_closing(self) -> None:
@@ -644,8 +701,10 @@ class ScanPopoutApplication():
         self.root.destroy()
 
 
-def main() -> None:
-    tkapp = MainTkApplication(DEFAULT_CONFIG_FILE)
+def main(is_root_process=True) -> None:
+    tkapp = MainTkApplication(
+        default_config_filename=DEFAULT_CONFIG_FILE,
+        is_root_process=is_root_process)
     tkapp.run()
 
 

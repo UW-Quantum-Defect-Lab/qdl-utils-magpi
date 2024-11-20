@@ -12,24 +12,24 @@ solid-state optical emitters and spin-qubits:
 * TTL pulsers
   * Quantum Composer Sapphire
   * Spin Core PulseBlaster
-* Excelitas SPCM for photon detection
 * NI-DAQ card (PCIx 6363) for data acquisition and control
-  * Jena System's piezo actuator stage control amplifier
+  * Edge counting from Excelitas SPCM for photon detection
+  * Jena System's piezo actuator stage control
   * Mad City Labs piezo actuator stage control
 * Newport Micrometers via serial connection
 
 Additionally, several fully interfaced, Python applications are provided for 
 standard and commonly used experiments:
 
-* `qt3scope`: Real-time oscilloscope readout from the SPCM via the digital input 
-  terminal on the NI-DAQ board.
-* `qt3scan`: Reconfigurable 1-d and 2-d confocal scan imaging.
-* `qt3pb`: A simple GUI for controlling the pulse blaster.
-* `qdlple`: Reconfigurable resonant excitation (photoluminescence excitation)
-  spectroscopy. 
 * `qdlmove`: Customizable graphical interface for position control, reconfigurable 
   for mutltiple positioners.
-  
+* `qdlple`: Reconfigurable resonant excitation (photoluminescence excitation)
+  spectroscopy. 
+* `qdlscan`:  Reconfigurable 1-d and 2-d confocal scan imaging.
+* `qdlscope`: Real-time oscilloscope readout from the SPCM via the digital input 
+  terminal on the NI-DAQ board.
+
+as well as some legacy applications from `qt3-utils`.
 
 Applications are generally structured to be easily configured for different
 setups (using supported hardware) via the use of YAML files.
@@ -39,12 +39,13 @@ and hardware interfaces can be utilized directly without the development of a GU
 or application.
 
 ### Intended usage
-Currently this repository is still under development to add generic, widely used
-functionality.
-Once these features have been added, this repository will no longer be in active 
-development.
-Instead, users are expected to fork from this repository and actively maintain their forks
-with their own applications and hardware.
+With the release of `v1.0.0` we are no longer actively developing features for the main 
+`qdlutils` repository.
+Bug fixes and modifications to existing applications may still be developed and pushed as 
+needed, however large changes will not be actively developed (unless there is significant
+need for such a feature).
+Instead, users are expected to fork this repository and maintain/actively develop their
+forks as needed for their own purposes.
 In the event that specific features, changes, or bug fixes are of generic interest to multiple 
 users, this repository may be merged/updated via a Pull Request.
 
@@ -189,6 +190,136 @@ Upgrading Tcl/Tk via Anaconda overcomes some GUI bugs on Mac OS Sonoma
 conda install 'tk>=8.6.13'
 ```
 
-# LICENSE
+### Configuration
+The base installation of `qdlutils` contains some basic configuration files in the form
+of YAML files (`*.yaml`).
+Within any of the `qdlapp` family applications (e.g. `qldscope`), the configuration file is
+stored in the `qdlapp/config_files` directory (e.g. `qdlutils/qdlscope/config_files/*.yaml`).
+Each application has a base configuration file `qdlapp_base.yaml` which contains the
+default configuration for the hardware that is loaded by the application on startup.
+For example, the `qdlscope_base.yaml` file reads
 
-[LICENCE](LICENSE)
+```
+QDLSCOPE:
+  ApplicationController:
+    import_path : qdlutils.applications.qdlscope.application_controller
+    class_name : ScopeController
+    hardware :
+      counter : Counter
+
+  Counter:
+    import_path : qdlutils.hardware.nidaq.counters.nidaqtimedratecounter
+    class_name  : NidaqTimedRateCounter
+    configure :
+      daq_name : Dev1               # NI DAQ Device Name
+      signal_terminal : PFI0        # DAQ Write channel
+      clock_terminal :              # Digital input terminal for external clock
+      clock_rate: 100000            # NI DAQ clock rate in Hz
+      sample_time_in_seconds : 1    # Sampling time in seconds (updates via GUI)
+      read_write_timeout : 10       # timeout in seconds for read/write operations
+      signal_counter : ctr2         # NIDAQ counter to use for count
+```
+
+The header `QDLSCOPE` signifies that the YAML file corresponds to the `qdlscope` application.
+When loading this file, the `qdlmove` application will read this file as a series of nested
+dictionaries (demarcated but indentation).
+The application then loads the hardware for the `Counter` using the class `class_name` defined 
+in `import_path`, which is then configured using the `configure` dictionary.
+Note that the structure of the YAML file for any given appliation will generally be different
+as it depends on the design of the configuration file loader within each application.
+Nevertheless, most configuration files are structured similarly.
+
+Users should modify the YAML configuration files to to match the hardware configuration in 
+their own systems.
+Modifying the base configuration files is expected and will set the default behavior.
+In some cases, the use of several different configurations (at different times) on the same
+system might be desired (e.g. for switching between different counters).
+All of the applications support the loading of YAML configuration files after startup,
+however not all applications have this feature enabled by default.
+In most cases this can be accomplished by some simple modificiation of the GUI and application
+classes (simply copying functions from other applications should suffice).
+Users may then create new YAML configuration files and save them in the `config_files` folder.
+
+Additionally, users may find it convenient to modify the default settings for various GUI
+elements within the applications (e.g. the scan range in `qdlscan`).
+To do so, one should navigate to the `qdlapp/application_gui.py` script file and locate the
+relevant GUI element, for example, to change the scan range in `qdlscan` one finds the lines
+
+```
+# in qdlscan/application_gui.py
+tk.Label(scan_frame, text='Range (μm)').grid(row=row, column=0, padx=5, pady=2)
+self.image_range_entry = tk.Entry(scan_frame, width=10)
+self.image_range_entry.insert(0, 80)
+self.image_range_entry.grid(row=row, column=1, padx=5, pady=2)
+```
+
+and then modify the line `self.image_range_entry.insert(0, 80)` changing the last argument from
+`80` to whatever the desired value is.
+A similar process can be achieved in all applications as desired.
+
+
+## Using the software
+If one intends to use multiple applications simultaneously it is recommended to run the applications
+through the `qdlhome` application.
+You can launch `qdlhome` via the `qdlutils` terminal command `qdlhome` or by navigating to 
+`qdlutils/applications/qdlhome/main.py` and running it directly.
+Note that `qdlhome` does not support the `qt3utils` legacy applications (although it would be possible
+to set this up if desired).
+
+Otherwise, single applications can be run directly from the terminal via commands installed with 
+`qdlutils`.
+The currently supported commands are:
+
+```
+qdlmove
+qdlple
+qdlscan
+qdlscope
+qt3scan
+qt3scope
+```
+
+of which each open their respective applications.
+Alternatively one can run the `main.py` file of the relevant application directly (or call 
+its method `main()` in another script).
+
+If a one-off experiment is desired then it is also possible to call the hardware classes
+or even application controllers (e.g. in `qdlapp/application_controller.py`) on their own.
+The `qdlutils` package already has some base experiments provided in `qdlutils.experiemnts`,
+however these files are (in the current version), legacy code from `qt3utils`, and may
+consequently require modification.
+Experiments need not be created in the `qdlutils` package itself as all hardware classes
+may be called from any location via standard imports.
+
+
+## LICENSE
+
+[BSD 3-Clause License](LICENSE)
+
+Copyright (c) 2022, University of Washington
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
