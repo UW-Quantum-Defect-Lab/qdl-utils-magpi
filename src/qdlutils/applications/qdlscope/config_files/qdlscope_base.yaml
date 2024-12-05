@@ -15,4 +15,4 @@ QDLSCOPE:
       clock_rate: 100000            # NI DAQ clock rate in Hz
       sample_time_in_seconds : 1    # Sampling time in seconds (updates later in scan)
       read_write_timeout : 10       # timeout in seconds for read/write operations
-      signal_counter : ctr2         # NIDAQ counter to use for count
+      signal_counter : ctr0         # NIDAQ counter to use for count
