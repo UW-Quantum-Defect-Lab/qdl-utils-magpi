@@ -44,13 +44,13 @@ class LauncherControlPanel:
         row += 1
         tk.Label(scan_frame, text='Range (μm)').grid(row=row, column=0, padx=5, pady=2)
         self.image_range_entry = tk.Entry(scan_frame, width=10)
-        self.image_range_entry.insert(0, 80)
+        self.image_range_entry.insert(0, 50)
         self.image_range_entry.grid(row=row, column=1, padx=5, pady=2)
         # Number of pixels
         row += 1
         tk.Label(scan_frame, text='Number of pixels').grid(row=row, column=0, padx=5, pady=2)
         self.image_pixels_entry = tk.Entry(scan_frame, width=10)
-        self.image_pixels_entry.insert(0, 80)
+        self.image_pixels_entry.insert(0, 50)
         self.image_pixels_entry.grid(row=row, column=1, padx=5, pady=2)
         # Scan speed
         row += 1
