@@ -803,7 +803,8 @@ class LineScanApplication:
         allowed_formats = [('Image with dataset', '*.png'), ('Dataset', '*.hdf5')]
 
         # Default filename
-        default_name = f'scan{self.id}_{self.timestamp.strftime("%Y%m%d")}'
+        # default_name = f'scan{self.id}_{self.timestamp.strftime("%Y%m%d")}'
+        default_name = f't{self.timestamp.strftime("%Y%m%d%H%M%S")}_scan{self.id}_'
             
         # Get the savefile name
         afile = tk.filedialog.asksaveasfilename(filetypes=allowed_formats, 
