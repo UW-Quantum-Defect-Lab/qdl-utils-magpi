@@ -14,7 +14,7 @@ class Ramsey:
     def __init__(self, ramsey_pulser, rfsynth, edge_counter_config,
                        photon_counter_nidaq_terminal = 'PFI0',
                        clock_nidaq_terminal = 'PFI12',
-                       trigger_nidaq_terminal = 'PFI1',
+                       trigger_nidaq_terminal = 'PFI13',
                        tau_low = 1e-6,
                        tau_high = 10e-6,
                        tau_step = 0.2e-6,

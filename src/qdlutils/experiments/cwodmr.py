@@ -17,7 +17,7 @@ class CWODMR(qdlutils.experiments.common.Experiment):
     def __init__(self, cwodmr_pulser, rfsynth, edge_counter_config,
                        photon_counter_nidaq_terminal = 'PFI0',
                        clock_nidaq_terminal = 'PFI12',
-                       trigger_nidaq_terminal = 'PFI1',
+                       trigger_nidaq_terminal = 'PFI13',
                        freq_low = 2820e6,
                        freq_high = 2920e6,
                        freq_step = 1e6,
