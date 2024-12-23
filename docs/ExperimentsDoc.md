@@ -85,7 +85,7 @@ Also shown here are some of the optional parameters that one may set
 experiment = qt3utils.experiments.cwodmr.CWODMR(cwodmr_pulser, rfsynth, nidaq_config,
                                              photon_counter_nidaq_terminal = 'PFI0',
                                              clock_nidaq_terminal = 'PFI12',
-                                             trigger_nidaq_terminal = 'PFI1',
+                                             trigger_nidaq_terminal = 'PFI13',
                                              freq_low=2700e6,
                                              freq_high=3000e6,
                                              freq_step=2e6,

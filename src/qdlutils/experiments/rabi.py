@@ -49,7 +49,7 @@ class Rabi(qdlutils.experiments.common.Experiment):
     def __init__(self, podmr_pulser, rfsynth, edge_counter_config,
                        photon_counter_nidaq_terminal = 'PFI0',
                        clock_nidaq_terminal = 'PFI12',
-                       trigger_nidaq_terminal = 'PFI1',
+                       trigger_nidaq_terminal = 'PFI13',
                        rf_pulse_duration_low = 100e-9,
                        rf_pulse_duration_high = 10e-6,
                        rf_pulse_duration_step = 50e-9,

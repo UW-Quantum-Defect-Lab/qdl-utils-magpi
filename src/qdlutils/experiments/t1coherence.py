@@ -14,7 +14,7 @@ class T1Coherence:
                        clock_pulser_channel = 'C',
                        clock_nidaq_terminal = 'PFI0',
                        trigger_pulser_channel = 'D',
-                       trigger_nidaq_terminal = 'PFI1',
+                       trigger_nidaq_terminal = 'PFI13',
                        laser_delay_low = 1e-6,
                        laser_delay_high = 100e-6,
                        laser_delay_step = 1e-6,

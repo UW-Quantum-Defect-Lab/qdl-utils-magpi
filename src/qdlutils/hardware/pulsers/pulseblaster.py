@@ -130,6 +130,7 @@ class PulseBlasterArb(PulseBlaster):
         self.start_programming()
 
         for clock_channel in self.clock_channels:
+            print('Making clock')
             pb.make_clock(clock_channel, int(self.clock_period*1e9))
 
         for a_chan_setting in self.channel_settings:
@@ -146,7 +147,7 @@ class PulseBlasterArb(PulseBlaster):
 
     def experimental_conditions(self):
         '''
-        Returns a dictionary of paramters that are pertinent for the relevant experiment
+        Returns a dictionary of parameters that are pertinent for the relevant experiment
         '''
         return {
             'full_cycle_width':self.full_cycle_width,
@@ -154,6 +155,77 @@ class PulseBlasterArb(PulseBlaster):
             'clock_period':self.clock_period,
             'channel_settings':self.channel_settings
         }
+    
+class PulseBlasterBlinkTest(PulseBlaster):
+    '''
+    Simple program to blink specified chanels on and off for testing purposes.
+    '''
+    def __init__(self, pb_board_number = 1,
+                       blink_channels = [0,1],
+                       cycle_period_s = 1,
+                       duty_cycle = 0.25,
+                       num_loops = 5
+                       ):
+        '''
+        pb_board_number - the board number
+        blink_channels - list of channels to blink, e.g. [0,2,3,24]
+        cycle_period_s - the period of the blinking cycle in seconds
+        duty_cycle - the fraction of the cycle that the channels are on
+        '''
+        self.pb_board_number = pb_board_number
+        self.blink_channels = blink_channels
+        self.cycle_period_s = cycle_period_s
+        self.duty_cycle = duty_cycle
+        self.num_loops = num_loops
+
+        # Pulse timing resolution is 10 ns
+        self.cycle_period_ns = int(np.round(self.cycle_period_s/(10e-9))*10)
+        if self.cycle_period_ns < 120:
+            raise ValueError(f'Cycle period too small: {self.cycle_period_ns} < 120 ns (i.e., 2 shortest instructions.)')
+        # Correct the cycle period
+        self.cycle_period_s = self.cycle_period_ns*1e-9
+        nom_on_time_s = np.round(self.duty_cycle*self.cycle_period_s/(10e-9))*10e-9
+        self.on_time_ns = int(nom_on_time_s*1e9)
+        if self.on_time_ns < 60:
+            raise ValueError(f'On time too small: {on_time_ns} < 60 ns (i.e., 1 shortest instruction.)')
+        # Set the on time
+        self.on_time_s = self.on_time_ns*1e-9
+        # Correct the duty cycle
+        self.duty_cycle = self.on_time_s/self.cycle_period_s
+        self.off_time_ns = self.cycle_period_ns - self.on_time_ns
+        self.off_time_s = self.off_time_ns*1e-9
+
+        print(f'Cycle period: {self.cycle_period_s} s')
+        print(f'On time: {self.on_time_s} s')
+        print(f'Off time: {self.off_time_s} s')
+        print(f'Duty cycle: {self.duty_cycle}')
+
+    def run(self):
+        self.open()
+        
+        self.on_word = 0x0
+        for channels in self.blink_channels:
+            self.on_word |= 1 << channels
+
+        self.start_programming()
+        pulseblaster.spinapi.pb_inst_pbonly(
+            0x0, pulseblaster.spinapi.Inst.CONTINUE, 0, 200.0)
+        loop_start = pulseblaster.spinapi.pb_inst_pbonly(
+            self.on_word, pulseblaster.spinapi.Inst.LOOP, self.num_loops, self.on_time_ns)
+        pulseblaster.spinapi.pb_inst_pbonly(
+            0x0, pulseblaster.spinapi.Inst.END_LOOP, loop_start, self.off_time_ns)
+        pulseblaster.spinapi.pb_inst_pbonly(
+            0x0, pulseblaster.spinapi.Inst.STOP, 0, 200.0)
+        
+        self.stop_programming()
+        pulseblaster.spinapi.pb_stop_programming()
+        pulseblaster.spinapi.pb_reset() 
+        pulseblaster.spinapi.pb_start()
+        pulseblaster.spinapi.pb_close()
+        pulseblaster.spinapi.pb_stop()
+        
+    
+
 
 class PulseBlasterHoldAOM(PulseBlasterArb):
     '''
@@ -350,7 +422,7 @@ class PulseBlasterPulsedODMR(PulseBlaster):
 
     def experimental_conditions(self):
         '''
-        Returns a dictionary of paramters that are pertinent for the relevant experiment
+        Returns a dictionary of parameters that are pertinent for the relevant experiment
         '''
         return {
             'rf_pulse_duration':self.rf_pulse_duration,
