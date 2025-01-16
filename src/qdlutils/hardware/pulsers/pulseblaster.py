@@ -187,7 +187,7 @@ class PulseBlasterBlinkTest(PulseBlaster):
         nom_on_time_s = np.round(self.duty_cycle*self.cycle_period_s/(10e-9))*10e-9
         self.on_time_ns = int(nom_on_time_s*1e9)
         if self.on_time_ns < 60:
-            raise ValueError(f'On time too small: {on_time_ns} < 60 ns (i.e., 1 shortest instruction.)')
+            raise ValueError(f'On time too small: {self.on_time_ns} < 60 ns (i.e., 1 shortest instruction.)')
         # Set the on time
         self.on_time_s = self.on_time_ns*1e-9
         # Correct the duty cycle
