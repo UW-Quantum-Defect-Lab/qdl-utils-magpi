@@ -63,7 +63,7 @@ class HomeApplication:
 
     def open_qdlmove(self, tkinter_event=None) -> None:
         try:
-            logger.info('Launching qdlmove...')
+            logger.info('Launching qdlmove... If this fails, make sure CONEX is initialized.')
             # Launches the application as a subprocess (the application opens a
             # tk.Toplevel instead of a tk.Tk (root) window). The software also skips
             # some steps that are necessary if running as the root.
