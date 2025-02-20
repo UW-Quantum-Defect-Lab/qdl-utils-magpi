@@ -73,12 +73,12 @@ class PositionControllerApplication():
         # This creates a controller for the specified axes
         # Edit the relevant section in `application_gui.py` to change the names
         # Make sure to pass the right application GUI to the `gui` argument below
-        self.micros_application = TwoAxisApplicationControl(
-                                    parent=self, 
-                                    gui=self.view.micros_view, 
-                                    axis_1_controller_name='MicroX', 
-                                    axis_2_controller_name='MicroY',
-                                    read_precision=0)
+        # self.micros_application = TwoAxisApplicationControl(
+        #                             parent=self, 
+        #                             gui=self.view.micros_view, 
+        #                             axis_1_controller_name='MicroX', 
+        #                             axis_2_controller_name='MicroY',
+        #                             read_precision=0)
         self.piezos_application = ThreeAxisApplicationControl(
                                     parent=self, 
                                     gui=self.view.piezos_view, 
@@ -90,8 +90,8 @@ class PositionControllerApplication():
         # 4. ADD THOSE CONTROLLERS TO THIS LIST
         # This list is used to keep track of the controllers to ensure that the stepping
         # does not overlap.
-        self.movement_controllers = [self.micros_application,
-                                     self.piezos_application]
+        self.movement_controllers = [#self.micros_application,
+                                     self.piezos_application,]
         
         # 5. ADD LOGIC FOR NEW TYPES OF HARDWARE
         # If you are using new hardware types (i.e. not `nidaqpizeo` or 

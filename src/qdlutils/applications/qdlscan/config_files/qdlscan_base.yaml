@@ -30,10 +30,10 @@ QDLSCAN:
       write_channel: ao0            # DAQ Write channel
       read_channel:                 # DAQ read channel
       move_settle_time: 0.0         # Time in seconds to wait after movement
-      scale_microns_per_volt: 8     # Number of microns moved per volt
+      scale_microns_per_volt: 5     # Number of microns moved per volt
       zero_microns_volt_offset: 5   # Value of voltage at position 0 microns
-      min_position: -40.0           # Minimum position in microns
-      max_position: 40.0            # Maximum position in microns
+      min_position: -25.0           # Minimum position in microns
+      max_position: 25.0            # Maximum position in microns
       invert_axis: True             # If True, modifies scale and offset internally to invert axis
 
   PiezoY:
@@ -44,10 +44,10 @@ QDLSCAN:
       write_channel: ao1
       read_channel: 
       move_settle_time: 0.0
-      scale_microns_per_volt: 8
+      scale_microns_per_volt: 5
       zero_microns_volt_offset: 5
-      min_position: -40.0
-      max_position: 40.0
+      min_position: -25.0
+      max_position: 25.0
       invert_axis: True
 
   PiezoZ:
@@ -58,8 +58,8 @@ QDLSCAN:
       write_channel: ao2
       read_channel: 
       move_settle_time: 0.0
-      scale_microns_per_volt: 8
+      scale_microns_per_volt: 5
       zero_microns_volt_offset: 5
-      min_position: -40.0
-      max_position: 40.0
+      min_position: -25.0
+      max_position: 25.0
       invert_axis: False

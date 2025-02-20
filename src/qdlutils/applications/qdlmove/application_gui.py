@@ -18,10 +18,10 @@ class PositionControllerApplicationView():
         # This creates a GUI element for the specified axes with the provided names.
         # You must make a controller of the right type and with correct associations
         # in order for the GUI to work properly.
-        self.micros_view = TwoAxisApplicationView(root_frame=frame, 
-                                                  title='Micros', 
-                                                  axis_1_label='X axis', 
-                                                  axis_2_label='Y axis')
+        # self.micros_view = TwoAxisApplicationView(root_frame=frame, 
+        #                                           title='Micros', 
+        #                                           axis_1_label='X axis', 
+        #                                           axis_2_label='Y axis')
         self.piezos_view = ThreeAxisApplicationView(root_frame=frame, 
                                                     title='Piezos', 
                                                     axis_1_label='X axis', 

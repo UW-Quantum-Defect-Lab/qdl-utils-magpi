@@ -1,5 +1,7 @@
 import h5py
 from tkinter import filedialog
+from scipy.optimize import curve_fit
+import numpy as np
 import matplotlib.pyplot as plt
 
 class readQDLScope:
@@ -47,7 +49,58 @@ class readQDLScope:
         plt.ylabel('Intensity (c/s)')
         plt.title('Intensity vs Time (Integration time = {}s)'.format(self.integration_time))
         plt.show()
+    
+    def plot_with_exp_decay(self, ax=None):
+        def exp_decay(t, A, tau, C):
+            return A * np.exp(-t / tau) + C
+        popt, pcov = curve_fit(exp_decay, self.timestamps, self.intensity, p0=(1, 1, 0), bounds=(0, [np.inf, np.inf,np.inf]))
+        A, tau, C = popt
+        fit_intensity = exp_decay(self.timestamps, *popt)
+
+        ax.plot(self.timestamps, self.intensity, label='Data')
+        ax.plot(self.timestamps, fit_intensity, label='Exp fit: A={:.2f}, tau={:.2f}, C={:.2f}'.format(A, tau, C))
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity (c/s)')
+        ax.legend()
+
+    def bin_and_fit_exp_decay(self, bin_size=5, ax=None):
+        def exp_decay(t, A, tau, C):
+            return A * np.exp(-t / tau) + C
+
+        binned_timestamps = []
+        binned_intensity = []
+
+        for i in range(0, len(self.timestamps), bin_size):
+            bin_end = i + bin_size
+            if bin_end > len(self.timestamps):
+                bin_end = len(self.timestamps)
+            bin_timestamps = self.timestamps[i:bin_end]
+            bin_intensity = self.intensity[i:bin_end]
+            if len(bin_intensity) > 0:
+                binned_timestamps.append(bin_timestamps.mean())
+                binned_intensity.append(bin_intensity.max())
+
+        binned_timestamps = np.array(binned_timestamps)
+        binned_intensity = np.array(binned_intensity)
+
+        popt, pcov = curve_fit(exp_decay, binned_timestamps, binned_intensity, p0=(1, 1, 0), bounds=(0, [np.inf, np.inf, np.inf]))
+        A, tau, C = popt
+        fit_intensity = exp_decay(binned_timestamps, *popt)
+        ax.plot(binned_timestamps, fit_intensity, label='Bin Max Fit: A={:.2f}, tau={:.2f}, C={:.2f}'.format(A, tau, C))
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Intensity (c/s)')
+        ax.legend()
+
+    def plot_fits(self):
+        bin_size = 5
+        fig, ax1 = plt.subplots(1, 1, figsize=(7, 5))
+        self.plot_with_exp_decay(ax1)
+        self.bin_and_fit_exp_decay(bin_size, ax1)
+        ax1.set_title('Integration time = {}s, Bin time = {}s'.format(self.integration_time, bin_size))
+        plt.tight_layout()
+        plt.show()
 
 if __name__ == "__main__":
     dat = readQDLScope()
     dat.plotIntensity()
+    dat.plot_fits()
