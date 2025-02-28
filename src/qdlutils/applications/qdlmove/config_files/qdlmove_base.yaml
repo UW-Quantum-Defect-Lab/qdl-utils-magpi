@@ -12,7 +12,7 @@ QDLMOVE:
     configure :
       port: COM5      # Serial port name
       min: 0.0        # Minimum position in microns
-      max: 15000.0    # Maximum position in microns
+      max: 16000.0    # Maximum position in microns
       timeout: 10     # Time in seconds before timing out on movement
 
   MicroY:
@@ -21,7 +21,7 @@ QDLMOVE:
     configure :
       port: COM6      # Serial port name
       min: 0.0        # Minimum position in microns
-      max: 21000.0    # Maximum position in microns
+      max: 23000.0    # Maximum position in microns
       timeout: 10     # Time in seconds before timing out on movement
 
   PiezoX:
