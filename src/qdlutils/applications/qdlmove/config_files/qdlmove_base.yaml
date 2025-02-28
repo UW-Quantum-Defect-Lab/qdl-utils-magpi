@@ -1,7 +1,7 @@
 QDLMOVE:
   Positioners:      # Add positioner configs defiend below; edit the GUI/application accordingly.
-    - MicroX
-    - MicroY
+    # - MicroX
+    # - MicroY
     - PiezoX
     - PiezoY
     - PiezoZ

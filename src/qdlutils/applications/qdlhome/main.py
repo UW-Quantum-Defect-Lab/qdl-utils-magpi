@@ -34,8 +34,8 @@ class HomeApplication:
 
     If you wish to include additional controls in this app specifically (such as simple
     DAQ controls to flip optical components or toggle hardware), then you should separate
-    this script into the standard main/application_controller/application_gui structure
-    of the other applications.
+    this script into the standard main.py/application_controller.py/application_gui.py
+    structure of the other applications.
     '''
 
     def __init__(self):
