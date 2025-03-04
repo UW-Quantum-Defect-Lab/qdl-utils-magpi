@@ -2,6 +2,7 @@
 
 try:
     import qdlutils.hardware.pulsers.PulseBlaster.spinapi as pb_spinapi
+    # import pulseblaster.spinapi as pb_spinapi
 except NameError as e:
     print('spinapi did not load. Message: ' + str(e))
     pb_spinapi = None
@@ -48,6 +49,7 @@ class pb_controls():
     def open(self):
         pb_spinapi.pb_select_board(self.pb_board_number)
         ret = pb_spinapi.pb_init()
+        print(f'pb_init returned {ret}')
         if ret != 0:
             self.close() #if opening fails, attempt to close before raising error
             raise PulseBlasterInitError(f'{ret}: {pb_spinapi.pb_get_error()}')
