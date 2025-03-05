@@ -1,4 +1,4 @@
-# This is copied from https://github.com/qt3uw/qt3RFSynthControl/blob/main/src/qt3rfsynthcontrol/device.py
+# This is originally copied from https://github.com/qt3uw/qt3RFSynthControl/blob/main/src/qt3rfsynthcontrol/device.py
 # Putting here to remove dependency on pip install qt3rfsynthcontrol
 import os
 import sys
@@ -30,7 +30,7 @@ def discover_devices():
     return devices
 
 
-class QT3SynthHD:
+class windfreak_synth_hd:
 
     def __init__(self, port):
         self._port = port
@@ -38,7 +38,7 @@ class QT3SynthHD:
         self.last_write_command = None
         self.open()
         self._command_history = collections.deque(maxlen=1000)
-        self.logger = logging.getLogger(__name__ + '.QT3SynthHD')
+        self.logger = logging.getLogger(__name__ + '.windfreak_synth_hd')
 
 ## PRIVATE
     def __del__(self):
@@ -51,7 +51,7 @@ class QT3SynthHD:
         self.close()
 
     def __repr__(self):
-        return f"QT3SynthHD({self._port})"
+        return f"windfreak_synth_hd({self._port})"
 
     def __str__(self):
         return print(self.hw_info())
