@@ -20,12 +20,12 @@ class PB_Instruct():
 
         for channel in self.active_channels:
             # Adjust start and stop times for delays and stretches
-            channel.start_stop_actual = [
+            channel.start_stop_actual = np.array([
                 [
                     np.round(start + channel.delay, 8),
                     np.round(stop + channel.delay + channel.pulse_length_to_add, 8)
                 ] for start, stop in channel.start_stop
-            ]
+            ])
 
             # Check if any start or stop time is greater than self.cycle_period
             for start, stop in channel.start_stop_actual:
@@ -33,12 +33,13 @@ class PB_Instruct():
                     raise ValueError(f"Start or stop time {start, stop} is greater than self.cycle_period {self.cycle_period}. channel.pin: {channel.pin}")
 
             # Convert times to integer nanoseconds.
-            channel.start_stop_actual_ns = [
-                [
-                    int(start * 1e9),
-                    int(stop * 1e9)
-                ] for start, stop in channel.start_stop_actual
-            ]
+            channel.start_stop_actual_ns = np.round(channel.start_stop_actual * 1e9).astype(int)
+            # channel.start_stop_actual_ns = [
+            #     [
+            #         int(np.round(start * 1e9)),
+            #         int(np.round(stop * 1e9))
+            #     ] for start, stop in channel.start_stop_actual
+            # ]
             # Count the number of channel flips.
             num_channel_flips += 2 * len(channel.start_stop_actual)
 
@@ -226,10 +227,10 @@ class PB_Instruct():
         # Convert the pin arrays to instruction words. Each word is an integer whose bits represent the pin states.
         self.instruction_pin_words = np.zeros(self.num_instructions, dtype=int)
         for m_instruction in range(self.num_instructions):
-            print(f'm_instruction: {m_instruction}')
+            # print(f'm_instruction: {m_instruction}')
             self.instruction_pin_words[m_instruction] = 0x0
             for m_channel in range(self.num_active_channels):
-                print(f'm_channel: {m_channel}')
+                # print(f'm_channel: {m_channel}')
                 self.instruction_pin_words[m_instruction] += int(self.instructions_pin_arr[m_instruction,m_channel]) << self.active_channels[m_channel].pin
         
         # print(f'chflip_pin_change_startns: {[chflip for chflip in chflip_pin_change_startns]}')
@@ -271,8 +272,8 @@ class PB_Instruct():
             times_intended.extend([self.cycle_period])
             values.extend([m_channel])
             
-            plt.plot(np.array(times_adjusted) * 1e-9, values, label=f'pin {channel.pin} adj.', linestyle='--', color=colors[m_channel])
-            plt.plot(np.array(times_intended), values, label=f'pin {channel.pin} int.', linestyle='-', color=colors[m_channel])
+            plt.plot(np.array(times_adjusted) * 1e-9, values, label=f'pin {channel.pin}, {channel.channel_name} adj.', linestyle='--', color=colors[m_channel])
+            plt.plot(np.array(times_intended), values, label=f'pin {channel.pin}, {channel.channel_name} int.', linestyle='-', color=colors[m_channel])
         
         plt.grid()
         plt.xlabel('Time (s)')
@@ -316,83 +317,83 @@ class PB_Instruct():
         plt.legend()
         plt.show()
 
-    def program_pb_loop_with_alloffs_and_run(
-            self,
-            check_visualization = True,
-            number_of_loop_rpts = None,
-            all_off_duration_ns = None):
-        # %% Program the PulseBlaster
+    # def program_pb_loop_with_alloffs_and_run(
+    #         self,
+    #         check_visualization = True,
+    #         number_of_loop_rpts = None,
+    #         all_off_duration_ns = None):
+    #     # %% Program the PulseBlaster
         
-        if check_visualization:
-            self.visualize_pb_sequence()
-            input('Press Enter to program the PulseBlaster.')
+    #     if check_visualization:
+    #         self.visualize_pb_sequence()
+    #         input('Press Enter to program the PulseBlaster.')
         
-        import qdlutils.hardware.pulsers.PulseBlaster.pulseblasterinterface as pulseblasterinterface
-        pbi = pulseblasterinterface.PulseBlasterInterface()
-        pbi.pb_board_number = 1
+    #     import qdlutils.hardware.pulsers.PulseBlaster.pulseblasterinterface as pulseblasterinterface
+    #     pbi = pulseblasterinterface.PulseBlasterInterface()
+    #     pbi.pb_board_number = 1
 
-        import qdlutils.hardware.pulsers.PulseBlaster.spinapi as pb_spinapi
+    #     import qdlutils.hardware.pulsers.PulseBlaster.spinapi as pb_spinapi
         
-        pbi.stop()
-        pbi.open()
-        pbi.start_programming()
+    #     pbi.stop()
+    #     pbi.open()
+    #     pbi.start_programming()
 
-        # Pre-loop all off.
-        pb_spinapi.pb_inst_pbonly(
-            0x0,
-            pb_spinapi.Inst.CONTINUE,
-            0,
-            all_off_duration_ns
-        )
+    #     # Pre-loop all off.
+    #     pb_spinapi.pb_inst_pbonly(
+    #         0x0,
+    #         pb_spinapi.Inst.CONTINUE,
+    #         0,
+    #         all_off_duration_ns
+    #     )
 
-        # Start of loop
-        m_instr = 0
-        if number_of_loop_rpts == np.inf:
-            loop_start_instruction = pb_spinapi.Inst.CONTINUE
-            loop_start_num_loops_arg = 0
-        else:
-            loop_start_instruction = pb_spinapi.Inst.LOOP
-            loop_start_num_loops_arg = number_of_loop_rpts
-        loop_start = pb_spinapi.pb_inst_pbonly(
-            int(self.instruction_pin_words[m_instr]),
-            loop_start_instruction,
-            loop_start_num_loops_arg,
-            int(self.instruction_durations[m_instr])
-        )
+    #     # Start of loop
+    #     m_instr = 0
+    #     if number_of_loop_rpts == np.inf:
+    #         loop_start_instruction = pb_spinapi.Inst.CONTINUE
+    #         loop_start_num_loops_arg = 0
+    #     else:
+    #         loop_start_instruction = pb_spinapi.Inst.LOOP
+    #         loop_start_num_loops_arg = number_of_loop_rpts
+    #     loop_start = pb_spinapi.pb_inst_pbonly(
+    #         int(self.instruction_pin_words[m_instr]),
+    #         loop_start_instruction,
+    #         loop_start_num_loops_arg,
+    #         int(self.instruction_durations[m_instr])
+    #     )
 
-        # All intermediate instructions
-        for m_instr in range(1, self.num_instructions-1):
-            pb_spinapi.pb_inst_pbonly(
-                int(self.instruction_pin_words[m_instr]),
-                pb_spinapi.Inst.CONTINUE,
-                0,
-                int(self.instruction_durations[m_instr])
-            )
+    #     # All intermediate instructions
+    #     for m_instr in range(1, self.num_instructions-1):
+    #         pb_spinapi.pb_inst_pbonly(
+    #             int(self.instruction_pin_words[m_instr]),
+    #             pb_spinapi.Inst.CONTINUE,
+    #             0,
+    #             int(self.instruction_durations[m_instr])
+    #         )
 
-        # End of the loop
-        m_instr = self.num_instructions - 1
-        if number_of_loop_rpts == np.inf:
-            loop_end_instruction = pb_spinapi.Inst.BRANCH
-        else:
-            loop_end_instruction = pb_spinapi.Inst.END_LOOP
-        pb_spinapi.pb_inst_pbonly(
-            int(self.instruction_pin_words[m_instr]),
-            loop_end_instruction,
-            loop_start,
-            int(self.instruction_durations[m_instr])
-        )
+    #     # End of the loop
+    #     m_instr = self.num_instructions - 1
+    #     if number_of_loop_rpts == np.inf:
+    #         loop_end_instruction = pb_spinapi.Inst.BRANCH
+    #     else:
+    #         loop_end_instruction = pb_spinapi.Inst.END_LOOP
+    #     pb_spinapi.pb_inst_pbonly(
+    #         int(self.instruction_pin_words[m_instr]),
+    #         loop_end_instruction,
+    #         loop_start,
+    #         int(self.instruction_durations[m_instr])
+    #     )
 
-        # Post-loop all off.
-        pb_spinapi.pb_inst_pbonly(
-            0x0,
-            pb_spinapi.Inst.STOP,
-            0,
-            200
-        )
+    #     # Post-loop all off.
+    #     pb_spinapi.pb_inst_pbonly(
+    #         0x0,
+    #         pb_spinapi.Inst.STOP,
+    #         0,
+    #         200
+    #     )
 
-        pbi.stop_programming()
+    #     pbi.stop_programming()
 
-        pbi.run_the_pb_sequence()
+    #     pbi.run_the_pb_sequence()
 
 
 
