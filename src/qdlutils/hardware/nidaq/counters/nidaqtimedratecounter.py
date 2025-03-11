@@ -14,7 +14,7 @@ class NidaqTimedRateCounter(NidaqBatchedRateCounter):
     '''
     This class implements an NIDAQ timed rate counter utilizing the edge counter 
     interface. This represents one layer of abstraction away from directly interfacing
-    with the hardware since the NIDAQ API is qutie complicated.
+    with the hardware since the NIDAQ API is quite complicated.
 
     Specifically, this class represents a standard rate counter which is structured
     around "timed" data collection wherein the counts are readout in batches of a 

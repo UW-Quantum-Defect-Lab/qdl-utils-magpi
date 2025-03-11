@@ -6,3 +6,5 @@ dist/*
 *.ipynb_checkpoints
 .idea*
 .vscode/*
+qdlutils.egg-info/*
+qdlutils/__pycache__/*

@@ -226,9 +226,11 @@ class PB_Instruct():
         # Convert the pin arrays to instruction words. Each word is an integer whose bits represent the pin states.
         self.instruction_pin_words = np.zeros(self.num_instructions, dtype=int)
         for m_instruction in range(self.num_instructions):
+            print(f'm_instruction: {m_instruction}')
             self.instruction_pin_words[m_instruction] = 0x0
             for m_channel in range(self.num_active_channels):
-                self.instruction_pin_words[m_instruction] += int(self.instructions_pin_arr[m_channel]) << self.active_channels[m_channel].pin
+                print(f'm_channel: {m_channel}')
+                self.instruction_pin_words[m_instruction] += int(self.instructions_pin_arr[m_instruction,m_channel]) << self.active_channels[m_channel].pin
         
         # print(f'chflip_pin_change_startns: {[chflip for chflip in chflip_pin_change_startns]}')
         # print(f'self.instructions_pin_arr: {self.instructions_pin_arr}')
@@ -242,7 +244,7 @@ class PB_Instruct():
         real_time_channel_fig = plt.figure()
 
         # N = self.num_active_channels
-        colors = plt.cm.nipy_spectral(np.linspace(0, 1, self.num_active_channels))
+        colors = plt.cm.nipy_spectral(np.linspace(0.1, 0.9, self.num_active_channels))
         # colors = ['r', 'g', 'b']  # Define colors for each channel
 
         # Plot the intended and actual channel states
@@ -271,7 +273,8 @@ class PB_Instruct():
             
             plt.plot(np.array(times_adjusted) * 1e-9, values, label=f'pin {channel.pin} adj.', linestyle='--', color=colors[m_channel])
             plt.plot(np.array(times_intended), values, label=f'pin {channel.pin} int.', linestyle='-', color=colors[m_channel])
-            
+        
+        plt.grid()
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title('PB output -- from start/stop times')
@@ -302,15 +305,18 @@ class PB_Instruct():
             plt.plot(
                 output_times * 1e-9, 
                 0.8*visual_pin_arr[:, m_channel] + m_channel, 
-                label=f'pin {self.active_channels[m_channel].pin}, {self.active_channels[m_channel].channel_name}')
-
+                label=f'pin {self.active_channels[m_channel].pin}, {self.active_channels[m_channel].channel_name}',
+                color=colors[m_channel]
+            )
+        
+        plt.grid()
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title('PB output -- from pin array')
         plt.legend()
         plt.show()
 
-    def program_pb_loop_with_alloffs(
+    def program_pb_loop_with_alloffs_and_run(
             self,
             check_visualization = True,
             number_of_loop_rpts = None,
@@ -385,6 +391,8 @@ class PB_Instruct():
         )
 
         pbi.stop_programming()
+
+        pbi.run_the_pb_sequence()
 
 
 
