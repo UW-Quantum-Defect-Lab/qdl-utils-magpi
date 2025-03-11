@@ -311,14 +311,14 @@ class TwoAxisApplicationControl():
         # Get the position from the GUI element
         dx = float(self.gui.axis_1_step_entry.get())
         # Set the axis
-        if tkinter_event.keysym == 'Left':
+        if tkinter_event.keysym == 'a':
             logger.info(f'Moving Axis 1 left by {dx}')
             self.parent.application_controller.step_axis(axis_controller_name=self.axis_1_controller_name, dx=-dx)
-        elif tkinter_event.keysym == 'Right':
+        elif tkinter_event.keysym == 'd':
             logger.info(f'Moving Axis 1 right by {dx}')
             self.parent.application_controller.step_axis(axis_controller_name=self.axis_1_controller_name, dx=dx)
         else:
-            logger.warning('Axis 1 step key not identified')
+            logger.warning(f'Axis 1 step key not identified. keysim: {tkinter_event.keysym}')
         # Update the reader
         self.gui.axis_1_readout_entry.config(state='normal')     
         self.gui.axis_1_readout_entry.delete(0,'end')
@@ -336,14 +336,14 @@ class TwoAxisApplicationControl():
         # Get the position from the GUI element
         dx = float(self.gui.axis_2_step_entry.get())
         # Set the axis
-        if tkinter_event.keysym == 'Down':
+        if tkinter_event.keysym == 'w':
             logger.info(f'Moving Axis 2 down by {dx}')
             self.parent.application_controller.step_axis(axis_controller_name=self.axis_2_controller_name, dx=-dx)
-        elif tkinter_event.keysym == 'Up':
+        elif tkinter_event.keysym == 's':
             logger.info(f'Moving Axis 2 up by {dx}')
             self.parent.application_controller.step_axis(axis_controller_name=self.axis_2_controller_name, dx=dx)
         else:
-            logger.warning('Axis 2 step key not identified')
+            logger.warning(f'Axis 2 step key not identified. keysim: {tkinter_event.keysym}')
         # Update the reader
         self.gui.axis_2_readout_entry.config(state='normal')     
         self.gui.axis_2_readout_entry.delete(0,'end')
