@@ -52,6 +52,7 @@ dependencies = [
     # "qt3rfsynthcontrol>=1.0.1",
     # "nipiezojenapy>=1.0.4",
     # "pulseblaster>=1.0.1",
+    "windfreak>=0.3.0"
     "PyYAML>=6.0.1",
     "pythonnet>=3.0.3"
 ]
