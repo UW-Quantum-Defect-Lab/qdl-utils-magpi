@@ -75,3 +75,21 @@ class PulseBlasterInterface():
         pb_stop_ret = pb_spinapi.pb_stop()
         print(f'pb_stop_ret = {pb_stop_ret}')
 
+    def pb_all_off(self):
+        self.reset()
+        self.stop()
+        self.open()
+        self.start_programming()
+
+        pb_spinapi.pb_inst_pbonly(
+            0x0,
+            pb_spinapi.Inst.BRANCH,
+            0,
+            1000
+        )
+
+        self.stop_programming()
+        self.run_the_pb_sequence()
+        self.close()
+        self.reset()
+        self.stop()
