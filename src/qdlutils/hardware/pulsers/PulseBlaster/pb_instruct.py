@@ -220,9 +220,10 @@ class PB_Instruct():
                 self.instruction_durations[m_instruction] = int(np.round(self.cycle_period * 1e9)) - start_ns
 
         # Remove any additional unused instructions
-        self.instructions_pin_arr = self.instructions_pin_arr[:m_instruction+1]
-        self.instruction_durations = self.instruction_durations[:m_instruction+1]
-        self.num_instructions = m_instruction + 1
+        self.instructions_pin_arr = self.instructions_pin_arr[:m_instruction]
+        self.instruction_durations = self.instruction_durations[:m_instruction]
+        # self.num_instructions = m_instruction + 1
+        self.num_instructions = len(self.instruction_durations)
 
         # Convert the pin arrays to instruction words. Each word is an integer whose bits represent the pin states.
         self.instruction_pin_words = np.zeros(self.num_instructions, dtype=int)
