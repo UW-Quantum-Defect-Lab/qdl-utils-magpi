@@ -127,7 +127,7 @@ class NidaqBatchedRateCounter:
     def __init__(self,
                  daq_name = 'Dev1',
                  signal_terminal = 'PFI0',
-                 clock_rate = 1000000,
+                 clock_rate = 1e6,
                  num_data_samples_per_batch = 1000,
                  clock_terminal = None,
                  read_write_timeout = 10,
