@@ -34,12 +34,6 @@ class PB_Instruct():
 
             # Convert times to integer nanoseconds.
             channel.start_stop_actual_ns = np.round(channel.start_stop_actual * 1e9).astype(int)
-            # channel.start_stop_actual_ns = [
-            #     [
-            #         int(np.round(start * 1e9)),
-            #         int(np.round(stop * 1e9))
-            #     ] for start, stop in channel.start_stop_actual
-            # ]
             # Count the number of channel flips.
             num_channel_flips += 2 * len(channel.start_stop_actual)
 
@@ -215,9 +209,17 @@ class PB_Instruct():
                 else:
                     raise ValueError('Unknown error in instruction pin array generation.')
             else:
-                # For the last flip, the current_pin_arr is the instruction_pin_arr for this instruction.
-                self.instructions_pin_arr[m_instruction] = current_pin_arr.copy()
-                self.instruction_durations[m_instruction] = int(np.round(self.cycle_period * 1e9)) - start_ns
+                # If a channel has a stop time at the end of the cycle_period, then there is no flip.
+                # This will result in a zero duration instruction.
+                final_instruction_duration_ns = int(np.round(self.cycle_period * 1e9)) - start_ns
+                if final_instruction_duration_ns >= 50:
+                    # For the last flip, the current_pin_arr is the instruction_pin_arr for this instruction.
+                    self.instructions_pin_arr[m_instruction] = current_pin_arr.copy()
+                    self.instruction_durations[m_instruction] = final_instruction_duration_ns
+                    m_instruction += 1
+                elif final_instruction_duration_ns < 50 and final_instruction_duration_ns != 0:
+                    raise ValueError(f'Conflict: final instruction duration is {final_instruction_duration_ns} ns. Pin: {pin}. This should not happen unless there is a problem with conflict resolution.')
+
 
         # Remove any additional unused instructions
         self.instructions_pin_arr = self.instructions_pin_arr[:m_instruction]
@@ -234,10 +236,10 @@ class PB_Instruct():
                 # print(f'm_channel: {m_channel}')
                 self.instruction_pin_words[m_instruction] += int(self.instructions_pin_arr[m_instruction,m_channel]) << self.active_channels[m_channel].pin
         
-        # print(f'chflip_pin_change_startns: {[chflip for chflip in chflip_pin_change_startns]}')
-        # print(f'self.instructions_pin_arr: {self.instructions_pin_arr}')
-        # print(f'self.instruction_durations: {self.instruction_durations}')
-        # print(f'self.instruction_pin_words: {self.instruction_pin_words}')
+        print(f'chflip_pin_change_startns: {[chflip for chflip in chflip_pin_change_startns]}')
+        print(f'self.instructions_pin_arr: {self.instructions_pin_arr}')
+        print(f'self.instruction_durations: {self.instruction_durations}')
+        print(f'self.instruction_pin_words: {self.instruction_pin_words}')
         
 
     def visualize_pb_sequence(self):
@@ -292,13 +294,16 @@ class PB_Instruct():
         output_times = np.repeat(output_times, 2)
         # Add two zeros at the beginning to show switching onto the initial state.
         output_times = np.insert(output_times, [0, 0], 0)
+        # Add the final cycle_period instruction to represent switching upon looping.
+        # output_times = np.append(output_times, self.cycle_period * 1e9)
         # Visual pin array
         visual_pin_arr = self.instructions_pin_arr.copy()
         # Repeat each pin twice for the vertical edges of the square wave.
         visual_pin_arr = np.repeat(visual_pin_arr, 2, axis=0)
         # Add a row of zeros at the beginning to show switching onto the initial state.
         visual_pin_arr = np.vstack([np.zeros(self.num_active_channels), visual_pin_arr])
-        # Add the initial state at the end to represent switching upon looping.
+        
+        # visual_pin_arr = np.vstack([visual_pin_arr, visual_pin_arr[-1]])
         visual_pin_arr = np.vstack([visual_pin_arr, visual_pin_arr[0]])
         # Convert to float for plotting.
         visual_pin_arr = np.array(visual_pin_arr, dtype=float)
