@@ -242,7 +242,7 @@ class PB_Instruct():
         print(f'self.instruction_pin_words: {self.instruction_pin_words}')
         
 
-    def visualize_pb_sequence(self):
+    def visualize_pb_sequence(self, time_range=None):
         import matplotlib.pyplot as plt
 
         real_time_channel_fig = plt.figure()
@@ -278,11 +278,19 @@ class PB_Instruct():
             plt.plot(np.array(times_adjusted) * 1e-9, values, label=f'pin {channel.pin}, {channel.channel_name} adj.', linestyle='--', color=colors[m_channel])
             plt.plot(np.array(times_intended), values, label=f'pin {channel.pin}, {channel.channel_name} int.', linestyle='-', color=colors[m_channel])
         
+        if time_range is not None:
+            plt.xlim(time_range)
         plt.grid()
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title('PB output -- from start/stop times')
-        plt.legend()
+        # XL = plt.xlim()
+        # plt.xlim([XL[0], XL[1]*1.5])
+        handles, labels = plt.gca().get_legend_handles_labels()
+        order = range(len(labels)-1, -1, -1)
+        plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='center left', bbox_to_anchor=(1, 0.5))
+        # plt.legend(loc='center right', bbox_to_anchor=(1, 0.5))
+        # plt.legend(
         plt.show()
 
         # Additional figure straight from the pin array.
@@ -292,19 +300,17 @@ class PB_Instruct():
         output_times = np.cumsum(self.instruction_durations)
         # Repeat each time twice for the vertical edges of the square wave.
         output_times = np.repeat(output_times, 2)
-        # Add two zeros at the beginning to show switching onto the initial state.
-        output_times = np.insert(output_times, [0, 0], 0)
-        # Add the final cycle_period instruction to represent switching upon looping.
-        # output_times = np.append(output_times, self.cycle_period * 1e9)
+        # Add a zero at the beginning to show initial state.
+        output_times = np.insert(output_times, [0,0], 0)
+        
         # Visual pin array
         visual_pin_arr = self.instructions_pin_arr.copy()
         # Repeat each pin twice for the vertical edges of the square wave.
         visual_pin_arr = np.repeat(visual_pin_arr, 2, axis=0)
-        # Add a row of zeros at the beginning to show switching onto the initial state.
+        # Add a row of zeros at the beginning to show switching on.
         visual_pin_arr = np.vstack([np.zeros(self.num_active_channels), visual_pin_arr])
-        
-        # visual_pin_arr = np.vstack([visual_pin_arr, visual_pin_arr[-1]])
-        visual_pin_arr = np.vstack([visual_pin_arr, visual_pin_arr[0]])
+        # Add a row of zeros at the end to show switching off.
+        visual_pin_arr = np.vstack([visual_pin_arr, np.zeros(self.num_active_channels)])
         # Convert to float for plotting.
         visual_pin_arr = np.array(visual_pin_arr, dtype=float)
 
@@ -316,11 +322,15 @@ class PB_Instruct():
                 color=colors[m_channel]
             )
         
+        if time_range is not None:
+            plt.xlim(time_range)
         plt.grid()
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title('PB output -- from pin array')
-        plt.legend()
+        handles, labels = plt.gca().get_legend_handles_labels()
+        order = range(len(labels)-1, -1, -1)
+        plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='center left', bbox_to_anchor=(1, 0.5))
         plt.show()
 
     # def program_pb_loop_with_alloffs_and_run(
