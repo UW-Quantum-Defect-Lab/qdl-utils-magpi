@@ -228,7 +228,7 @@ class NidaqEdgeCounterInterface:
 
         Notes
         -----
-        This configuration follow's the qudi configuration for edge counting.
+        This configuration follows the qudi configuration for edge counting.
 
         In this setup, a counter task is configured to measure the period of the signal
         that is attached to its gate terminal. In the code below, you will see that 
