@@ -8,6 +8,7 @@ except NameError as e:
     pb_spinapi = None
 
 import numpy as np
+import time
 from qdlutils.errors import PulseBlasterInitError, PulseBlasterError
 
 
@@ -90,6 +91,7 @@ class PulseBlasterInterface():
 
         self.stop_programming()
         self.run_the_pb_sequence()
-        self.close()
+        time.sleep(0.1)
         self.reset()
         self.stop()
+        self.close()
