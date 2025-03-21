@@ -39,7 +39,7 @@ class PB_Instruct():
         self.cycle_period = cycle_period
         self.clock_pin = clock_pin
         self.clock_type = clock_type
-        if clock_type is None:
+        if clock_pin is not None and clock_type is None:
             raise ValueError('clock_type must be specified.')
         self.instruction_conflict_resolution_method = instruction_conflict_resolution_method
 
@@ -256,10 +256,10 @@ class PB_Instruct():
         # self.instructions_pin_arr each time all simultaneous flips are accounted for in an instruction.
         current_pin_arr = np.zeros(self.num_active_channels, dtype=int)
         # self.instructions_pin_arr is an array of pin states for each instruction. These will be converted to instruction words later.
-        # Initialize this with length num_channel_flips, but it will be shortened if any flips are simultaneous.
-        self.instructions_pin_arr = np.zeros((num_channel_flips, self.num_active_channels), dtype=int)
+        # Initialize this with length num_channel_flips + 1, but it will be shortened if any flips are simultaneous. The +1 is for the final instruction if there is all off time.
+        self.instructions_pin_arr = np.zeros((num_channel_flips + 1, self.num_active_channels), dtype=int)
         # self.instruction_durations is an array of durations for each instruction.
-        self.instruction_durations = np.zeros(num_channel_flips, dtype=int)
+        self.instruction_durations = np.zeros(num_channel_flips + 1, dtype=int)
         m_instruction = 0
         if chflip_pin_change_startns[0][2] != 0:
             # If the first flip is not at time 0, then there is an instruction with all channels off.
@@ -314,7 +314,6 @@ class PB_Instruct():
         # Remove any additional unused instructions
         self.instructions_pin_arr = self.instructions_pin_arr[:m_instruction]
         self.instruction_durations = self.instruction_durations[:m_instruction]
-        # self.num_instructions = m_instruction + 1
         self.num_instructions = len(self.instruction_durations)
 
         # Convert the pin arrays to instruction words. Each word is an integer whose bits represent the pin states.
