@@ -81,7 +81,6 @@ class PulseBlasterInterface():
         self.stop()
         self.open()
         self.start_programming()
-
         pb_spinapi.pb_inst_pbonly(
             0x0,
             pb_spinapi.Inst.BRANCH,
@@ -95,3 +94,4 @@ class PulseBlasterInterface():
         self.reset()
         self.stop()
         self.close()
+
