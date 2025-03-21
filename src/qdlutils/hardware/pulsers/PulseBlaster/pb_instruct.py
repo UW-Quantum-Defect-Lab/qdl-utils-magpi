@@ -261,6 +261,11 @@ class PB_Instruct():
         # self.instruction_durations is an array of durations for each instruction.
         self.instruction_durations = np.zeros(num_channel_flips, dtype=int)
         m_instruction = 0
+        if chflip_pin_change_startns[0][2] != 0:
+            # If the first flip is not at time 0, then there is an instruction with all channels off.
+            self.instructions_pin_arr[m_instruction] = current_pin_arr.copy()
+            self.instruction_durations[m_instruction] = chflip_pin_change_startns[0][2]
+            m_instruction += 1
         # Loop through the channel flips
         for m_flip in range(num_channel_flips):
             # Get the info of the flip event
