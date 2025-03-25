@@ -93,5 +93,4 @@ class PulseBlasterInterface():
         time.sleep(0.1)
         self.reset()
         self.stop()
-        self.close()
 
