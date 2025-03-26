@@ -52,7 +52,7 @@ class PulseBlasterInterface():
     def open(self):
         pb_spinapi.pb_select_board(self.pb_board_number)
         ret = pb_spinapi.pb_init()
-        print(f'pb_init returned {ret}')
+        # print(f'pb_init returned {ret}')
         if ret != 0:
             self.close() #if opening fails, attempt to close before raising error
             raise PulseBlasterInitError(f'{ret}: {pb_spinapi.pb_get_error()}')
@@ -66,15 +66,15 @@ class PulseBlasterInterface():
         # The start() method wasn't working. This following sequence of commands 
         # was found to work. Why, tbd.
         pb_stop_programming_ret = pb_spinapi.pb_stop_programming()
-        print(f'pb_stop_programming_ret = {pb_stop_programming_ret}')
+        # print(f'pb_stop_programming_ret = {pb_stop_programming_ret}')
         pb_reset_ret = pb_spinapi.pb_reset()
-        print(f'pb_reset_ret = {pb_reset_ret}')
+        # print(f'pb_reset_ret = {pb_reset_ret}')
         pb_start_ret = pb_spinapi.pb_start()
-        print(f'pb_start_ret = {pb_start_ret}')
+        # print(f'pb_start_ret = {pb_start_ret}')
         pb_close_ret = pb_spinapi.pb_close()
-        print(f'pb_close_ret = {pb_close_ret}')
+        # print(f'pb_close_ret = {pb_close_ret}')
         pb_stop_ret = pb_spinapi.pb_stop()
-        print(f'pb_stop_ret = {pb_stop_ret}')
+        # print(f'pb_stop_ret = {pb_stop_ret}')
 
     def pb_all_off(self):
         self.reset()
