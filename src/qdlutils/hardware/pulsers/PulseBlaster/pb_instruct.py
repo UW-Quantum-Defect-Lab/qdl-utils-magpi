@@ -370,6 +370,7 @@ class PB_Instruct():
         if time_range is not None:
             plt.xlim(time_range)
         plt.grid()
+        plt.ticklabel_format(style='scientific', axis='x', scilimits=(0, 0), useMathText=True)
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title('PB output -- from start/stop times')
@@ -378,9 +379,10 @@ class PB_Instruct():
         handles, labels = plt.gca().get_legend_handles_labels()
         order = range(len(labels)-1, -1, -1)
         plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='center left', bbox_to_anchor=(1, 0.5))
-        # plt.legend(loc='center right', bbox_to_anchor=(1, 0.5))
-        # plt.legend(
-        plt.show()
+        plt.subplots_adjust(right=0.7)  # Add extra space on the right for the legend
+        plt.gcf().set_size_inches(12, 8)  # Increase the width of the figure window
+        plt.show(block=False)
+        plt.pause(0.001)
 
         # Additional figure straight from the pin array.
         pin_arr_to_realtime_fig = plt.figure()
@@ -414,13 +416,17 @@ class PB_Instruct():
         if time_range is not None:
             plt.xlim(time_range)
         plt.grid()
+        plt.ticklabel_format(style='scientific', axis='x', scilimits=(0, 0), useMathText=True)
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title('PB output -- from pin array')
         handles, labels = plt.gca().get_legend_handles_labels()
         order = range(len(labels)-1, -1, -1)
         plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.show()
+        plt.subplots_adjust(right=0.7)  # Add extra space on the right for the legend
+        plt.gcf().set_size_inches(12, 8)  # Increase the width of the figure window
+        plt.show(block=False)
+        plt.pause(0.001)
 
     # def program_pb_loop_with_alloffs_and_run(
     #         self,
