@@ -50,12 +50,15 @@ class PB_Instruct():
 
         for channel in self.active_channels:
             # Adjust start and stop times for delays and stretches
-            channel.start_stop_actual = np.array([
-                [
-                    np.round(start + channel.delay, 8),
-                    np.round(stop + channel.delay + channel.pulse_extension, 8)
-                ] for start, stop in channel.start_stop
-            ])
+            try:
+                channel.start_stop_actual = np.array([
+                    [
+                        np.round(start + channel.delay, 8),
+                        np.round(stop + channel.delay + channel.pulse_extension, 8)
+                    ] for start, stop in channel.start_stop
+                ])
+            except Exception as e:
+                raise ValueError(f'Error in channel {channel.pin}: {e}. Check start_stop formatting!')
 
             # Check if any start or stop time is greater than self.cycle_period
             for start, stop in channel.start_stop_actual:
