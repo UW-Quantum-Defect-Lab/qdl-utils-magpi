@@ -245,12 +245,15 @@ class TwoAxisApplicationControl():
         # Check if the checkbox is checked in the GUI
         if (self.gui.stepping_active.get() == 1):
             # Disable the other stepping checkboxes if they are active
-            for controller in self.parent.movement_controllers:
-                if controller is not self and (controller.gui.stepping_active.get()==1):
-                    # Uncheck the box
-                    controller.gui.stepping_active.set(0)
-                    # Toggle the stepping
-                    controller.toggle_stepping()
+            # NOTE: This has been commented out here because the MagPI setup uses simultaneous
+            # stepping of both two and three axis controllers. Importantly, the two toggle_stepping
+            # methods use different key bindings to avoid conflicts.
+            # for controller in self.parent.movement_controllers:
+            #     if controller is not self and (controller.gui.stepping_active.get()==1):
+                    # # Uncheck the box
+                    # controller.gui.stepping_active.set(0)
+                    # # Toggle the stepping
+                    # controller.toggle_stepping()
             # Bind the keys to root
             self.parent.root.bind('<a>', self.step_axis_1)
             self.parent.root.bind('<d>', self.step_axis_1)
@@ -412,12 +415,15 @@ class ThreeAxisApplicationControl():
         '''
         if (self.gui.stepping_active.get() == 1):
             # Disable the other stepping checkboxes if they are active
-            for controller in self.parent.movement_controllers:
-                if controller is not self and (controller.gui.stepping_active.get() == 1):
-                    # Uncheck the box
-                    controller.gui.stepping_active.set(0)
-                    # Toggle the stepping
-                    controller.toggle_stepping()
+            # NOTE: This has been commented out here because the MagPI setup uses simultaneous
+            # stepping of both two and three axis controllers. Importantly, the two toggle_stepping
+            # methods use different key bindings to avoid conflicts.
+            # for controller in self.parent.movement_controllers:
+                # if controller is not self and (controller.gui.stepping_active.get() == 1):
+                    # # Uncheck the box
+                    # controller.gui.stepping_active.set(0)
+                    # # Toggle the stepping
+                    # controller.toggle_stepping()
             # Bind the keys to root
             self.parent.root.bind('<Left>', self.step_axis_1)
             self.parent.root.bind('<Right>', self.step_axis_1)
