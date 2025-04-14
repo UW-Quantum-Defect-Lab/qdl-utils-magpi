@@ -419,11 +419,11 @@ class ThreeAxisApplicationControl():
             # stepping of both two and three axis controllers. Importantly, the two toggle_stepping
             # methods use different key bindings to avoid conflicts.
             # for controller in self.parent.movement_controllers:
-                # if controller is not self and (controller.gui.stepping_active.get() == 1):
-                    # # Uncheck the box
-                    # controller.gui.stepping_active.set(0)
-                    # # Toggle the stepping
-                    # controller.toggle_stepping()
+            #     if controller is not self and (controller.gui.stepping_active.get() == 1):
+            #         # Uncheck the box
+            #         controller.gui.stepping_active.set(0)
+            #         # Toggle the stepping
+            #         controller.toggle_stepping()
             # Bind the keys to root
             self.parent.root.bind('<Left>', self.step_axis_1)
             self.parent.root.bind('<Right>', self.step_axis_1)
