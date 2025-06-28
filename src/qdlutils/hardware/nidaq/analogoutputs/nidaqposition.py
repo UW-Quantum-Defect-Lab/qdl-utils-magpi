@@ -74,10 +74,10 @@ class NidaqPositionController(NidaqVoltageController):
                  write_channel: str = 'ao0',
                  read_channel: str = None,
                  move_settle_time: float = 0.0,
-                 scale_microns_per_volt: float=8,
-                 zero_microns_volt_offset: float=5,
-                 min_position: float = -40.0,
-                 max_position: float = 40.0,
+                 scale_microns_per_volt: float=5.0,
+                 zero_microns_volt_offset: float=5.0,
+                 min_position: float = -25.0,
+                 max_position: float = 25.0,
                  invert_axis: bool = False) -> None:
 
         self.scale_microns_per_volt = scale_microns_per_volt
