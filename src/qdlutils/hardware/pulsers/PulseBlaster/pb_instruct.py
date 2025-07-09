@@ -88,7 +88,7 @@ class PB_Instruct():
         # This is done by changing the start times of the pulses.
 
         # Clock constraint -- fixed frequency
-        # Align non-clock channel start times with clock channel start times if within 50 ns
+        # Align non-clock channel start times with clock channel start times if within 60 ns
         if self.clock_pin is not None and self.clock_type == 'fixed_frequency':
             for m_flip in range(num_channel_flips):
                 # Get the info of the flip event that might need to be changed
@@ -99,13 +99,13 @@ class PB_Instruct():
                         # Get the info of the flip that might be a clock channel flip.
                         clock_pin, clock_change, clock_start_ns = clock_chflip
                         # Check if it is actually a clock channel flip and if the start times are close but not equal.
-                        if clock_pin == self.clock_pin and 0 < abs(start_ns - clock_start_ns) < 50:
+                        if clock_pin == self.clock_pin and 0 < abs(start_ns - clock_start_ns) < 60:
                             if self.instruction_conflict_resolution_method == 'abort':
                                 raise ValueError(f'Conflict between flip {m_flip} and clock channel flip. Times: {start_ns} and {clock_start_ns}. Re-examine pulse timing or change instruction_conflict_resolution_method.')
                             elif self.instruction_conflict_resolution_method == 'round_early':
                                 # Round to earliest time that does not conflict with the clock flip.
                                 if start_ns < clock_start_ns:
-                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns - 50
+                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns - 60
                                 elif start_ns > clock_start_ns:
                                     chflip_pin_change_startns[m_flip][2] = clock_start_ns
                             elif self.instruction_conflict_resolution_method == 'round_late':
@@ -113,13 +113,13 @@ class PB_Instruct():
                                 if start_ns < clock_start_ns:
                                     chflip_pin_change_startns[m_flip][2] = clock_start_ns
                                 elif start_ns > clock_start_ns:
-                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns + 50
+                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns + 60
                             elif self.instruction_conflict_resolution_method == 'round_near':
                                 # Round to nearest time that does not conflict with the clock flip.
-                                if start_ns < clock_start_ns - 25:
-                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns - 50
-                                elif start_ns > clock_start_ns + 25:
-                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns + 50
+                                if start_ns < clock_start_ns - 30:
+                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns - 60
+                                elif start_ns > clock_start_ns + 30:
+                                    chflip_pin_change_startns[m_flip][2] = clock_start_ns + 60
                                 else:
                                     chflip_pin_change_startns[m_flip][2] = clock_start_ns
                             else:
@@ -141,14 +141,14 @@ class PB_Instruct():
         #                 # Get the info of the flip that might be a clock channel flip.
         #                 clock_pin, clock_change, clock_start_ns = clock_chflip
         #                 # Check if it is actually a clock channel flip and if the flip times violate the PB constraints.
-        #                 if clock_pin == self.clock_pin and 0 < abs(start_ns - clock_start_ns) < 50:
+        #                 if clock_pin == self.clock_pin and 0 < abs(start_ns - clock_start_ns) < 60:
         #                     if clock_change == 1:
         #                         if self.instruction_conflict_resolution_method == 'abort':
         #                             raise ValueError(f'Conflict between flip {m_flip} and clock channel flip. Times: {start_ns} and {clock_start_ns}. Re-examine pulse timing or change instruction_conflict_resolution_method.')
         #                         elif self.instruction_conflict_resolution_method == 'round_early':
         #                         # Round to earliest time that does not conflict with the clock flip.
         #                             if start_ns < clock_start_ns:
-        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns - 50
+        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns - 60
         #                             elif start_ns > clock_start_ns:
         #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns
         #                         elif self.instruction_conflict_resolution_method == 'round_late':
@@ -156,13 +156,13 @@ class PB_Instruct():
         #                             if start_ns < clock_start_ns:
         #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns
         #                             elif start_ns > clock_start_ns:
-        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns + 50
+        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns + 60
         #                         elif self.instruction_conflict_resolution_method == 'round_near':
         #                             # Round to nearest time that does not conflict with the clock flip.
-        #                             if start_ns < clock_start_ns - 25:
-        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns - 50
-        #                             elif start_ns > clock_start_ns + 25:
-        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns + 50
+        #                             if start_ns < clock_start_ns - 30:
+        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns - 60
+        #                             elif start_ns > clock_start_ns + 30:
+        #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns + 60
         #                             else:
         #                                 chflip_pin_change_startns[m_flip][2] = clock_start_ns
         #                         else:
@@ -206,7 +206,7 @@ class PB_Instruct():
                     ):
                     continue
                 # Check if the next channel flip is too close to the current channel flip.
-                if next_start_ns != start_ns and next_start_ns < start_ns + 50:
+                if next_start_ns != start_ns and next_start_ns < start_ns + 60:
                     # If it is, increment the number of conflicts.
                     num_conflicts += 1
                     if self.instruction_conflict_resolution_method == 'abort':
@@ -220,13 +220,13 @@ class PB_Instruct():
                             chflip_pin_change_startns[m_flip + 1][2] = start_ns
                         elif this_resolution_method == 'round_late':
                             # Round the next channel flip to the latest time that does not conflict with this channel flip.
-                            chflip_pin_change_startns[m_flip + 1][2] = start_ns + 50
+                            chflip_pin_change_startns[m_flip + 1][2] = start_ns + 60
                         elif this_resolution_method == 'round_near':
                             # Round the next channel flip to the nearest time that does not conflict with this channel flip.
-                            if next_start_ns < start_ns + 25:
+                            if next_start_ns < start_ns + 30:
                                 chflip_pin_change_startns[m_flip + 1][2] = start_ns
-                            elif next_start_ns > start_ns + 25:
-                                chflip_pin_change_startns[m_flip + 1][2] = start_ns + 50
+                            elif next_start_ns > start_ns + 30:
+                                chflip_pin_change_startns[m_flip + 1][2] = start_ns + 60
                         else:
                             raise ValueError(f'Unknown instruction_conflict_resolution_method: {self.instruction_conflict_resolution_method}.')
                         print([
@@ -286,16 +286,16 @@ class PB_Instruct():
                     # If the next flip is at the same time as the current flip, then continue the 
                     # for-loop to the next flip without incrementing m_instruction.
                     continue
-                elif next_start_ns >= start_ns + 50:
-                    # If the next flip is at least 50 ns after the current flip, then
+                elif next_start_ns >= start_ns + 60:
+                    # If the next flip is at least 60 ns after the current flip, then
                     # the current_pin_arr is the instruction_pin_arr for this instruction.
                     self.instructions_pin_arr[m_instruction] = current_pin_arr.copy()
                     # The duration of the instruction is the time between the current flip and the next flip.
                     self.instruction_durations[m_instruction] = next_start_ns - start_ns
                     # Increment the instruction counter.
                     m_instruction += 1
-                elif next_start_ns < start_ns + 50:
-                    # If the next flip is less than 50 ns after the current flip, then
+                elif next_start_ns < start_ns + 60:
+                    # If the next flip is less than 60 ns after the current flip, then
                     # there is a problem. This error shouldn't occur if the conflict resolution
                     # methods are working correctly.
                     raise ValueError(f'Conflict between channel flips {m_flip} and {m_flip + 1}. Times: {start_ns} and {next_start_ns}. Pins: {pin} and {next_pin}. This should not happen unless there is a problem with conflict resolution.')
@@ -305,12 +305,12 @@ class PB_Instruct():
                 # If a channel has a stop time at the end of the cycle_period, then there is no flip.
                 # This will result in a zero duration instruction.
                 final_instruction_duration_ns = int(np.round(self.cycle_period * 1e9)) - start_ns
-                if final_instruction_duration_ns >= 50:
+                if final_instruction_duration_ns >= 60:
                     # For the last flip, the current_pin_arr is the instruction_pin_arr for this instruction.
                     self.instructions_pin_arr[m_instruction] = current_pin_arr.copy()
                     self.instruction_durations[m_instruction] = final_instruction_duration_ns
                     m_instruction += 1
-                elif final_instruction_duration_ns < 50 and final_instruction_duration_ns != 0:
+                elif final_instruction_duration_ns < 60 and final_instruction_duration_ns != 0:
                     raise ValueError(f'Conflict: final instruction duration is {final_instruction_duration_ns} ns. Pin: {pin}. This should not happen unless there is a problem with conflict resolution.')
 
 
