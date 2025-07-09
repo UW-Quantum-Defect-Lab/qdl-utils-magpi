@@ -59,9 +59,9 @@ class PulseBlasterInterface():
         pb_spinapi.pb_core_clock(100*pb_spinapi.MHz)
 
     def raise_for_pulse_width(self, pulse_duration):
-        if pulse_duration < 50e-9:
-            raise ValueError('Pulse duration must be at least 50 ns')
-        
+        if pulse_duration < 60e-9:
+            raise ValueError('Pulse duration must be at least 60 ns')
+
     def run_the_pb_sequence(self):
         # The start() method wasn't working. This following sequence of commands 
         # was found to work. Why, tbd.
