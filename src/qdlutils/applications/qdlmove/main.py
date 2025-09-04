@@ -516,9 +516,11 @@ class ThreeAxisApplicationControl():
         # Update the reader
         self.gui.axis_1_readout_entry.config(state='normal')     
         self.gui.axis_1_readout_entry.delete(0,'end')
+        pos_val = round(self.parent.application_controller.positioners[self.axis_1_controller_name].last_write_value,
+                    self.read_precision)
         self.gui.axis_1_readout_entry.insert(
-            0,round(self.parent.application_controller.positioners[self.axis_1_controller_name].last_write_value,
-                    self.read_precision))
+            0,pos_val)
+        logger.info(f'Axis 1 position: {pos_val}')
         self.gui.axis_1_readout_entry.config(state='readonly')
     
     def step_axis_2(self, tkinter_event=None):
